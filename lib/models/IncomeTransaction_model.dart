@@ -1,29 +1,44 @@
 import 'dart:convert';
 
-IncomeTransaction incomeTransFromJson(String str) =>
-    IncomeTransaction.fromJson(json.decode(str));
-String incomeTransToJson(IncomeTransaction data) => json.encode(data.toJson());
+IncomeTransaction incomeTransactionFromJson(String str) {
+  final jsonData = json.decode(str);
+  return IncomeTransaction.fromMap(jsonData);
+}
+
+String incomeTransactionToJson(IncomeTransaction data) {
+  final dyn = data.toMap();
+  return json.encode(dyn);
+}
 
 class IncomeTransaction {
+  int id;
   String name;
   String date;
-  String category;
-  String amount;
-  String reoccur;
+  int category;
+  double amount;
+  int reoccur;
 
-  IncomeTransaction(
-      {this.name, this.date, this.category, this.amount, this.reoccur});
+  IncomeTransaction({
+    this.id,
+    this.name,
+    this.date,
+    this.category,
+    this.amount,
+    this.reoccur,
+  });
 
-  factory IncomeTransaction.fromJson(Map<String, dynamic> json) =>
-      IncomeTransaction(
+  factory IncomeTransaction.fromMap(Map<String, dynamic> json) =>
+      new IncomeTransaction(
+        id: json["id"],
         name: json["name"],
         date: json["date"],
         category: json["category"],
-        amount: json["amount"],
+        amount: json["amount"].toDouble(),
         reoccur: json["reoccur"],
       );
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toMap() => {
+        "id": id,
         "name": name,
         "date": date,
         "category": category,

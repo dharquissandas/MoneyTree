@@ -1,8 +1,11 @@
 import 'package:currency_textfield/currency_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:money_tree/models/IncomeCategorieModel.dart';
 import 'package:money_tree/models/IncomeTransaction_model.dart';
+import 'package:money_tree/screens/homescreen.dart';
 import 'package:money_tree/utils/Database.dart';
+import 'package:page_transition/page_transition.dart';
 
 class AddIncome extends StatefulWidget {
   @override
@@ -10,35 +13,16 @@ class AddIncome extends StatefulWidget {
 }
 
 class _AddIncomeState extends State<AddIncome> {
-  List<DropdownMenuItem<int>> categoryList = [];
-
-  void loadCategoryList() {
-    categoryList = [];
-    categoryList.add(new DropdownMenuItem(
-      child: new Text("Allowance"),
-      value: 0,
-    ));
-    categoryList.add(new DropdownMenuItem(
-      child: new Text("Salary"),
-      value: 1,
-    ));
-    categoryList.add(new DropdownMenuItem(
-      child: new Text("Petty Cash"),
-      value: 2,
-    ));
-    categoryList.add(new DropdownMenuItem(
-      child: new Text("Bonus"),
-      value: 3,
-    ));
-    categoryList.add(new DropdownMenuItem(
-      child: new Text("Other"),
-      value: 4,
-    ));
+  int boolcheck(bool reoccur) {
+    if (reoccur) {
+      return 1;
+    }
+    return 0;
   }
 
   String name;
   String date = DateTime.now().toIso8601String();
-  int category = 0;
+  int category;
   double amount;
   bool reoccur = false;
 
@@ -56,8 +40,9 @@ class _AddIncomeState extends State<AddIncome> {
 
     if (picked != null) {
       setState(() {
-        date = picked.toIso8601String();
-        _date.value = TextEditingValue(text: picked.toString());
+        date = picked.toIso8601String().substring(0, 10);
+        _date.value =
+            TextEditingValue(text: picked.toString().substring(0, 10));
       });
     }
   }
@@ -93,18 +78,29 @@ class _AddIncomeState extends State<AddIncome> {
   }
 
   Widget buildCategory() {
-    loadCategoryList();
-    return DropdownButton(
-      hint: new Text("Select Category"),
-      items: categoryList,
-      value: category,
-      onChanged: (value) {
-        setState(() {
-          category = value;
+    return FutureBuilder<List<IncomeCategory>>(
+        future: DBProvider.db.getIncomeCategories(),
+        builder: (BuildContext context,
+            AsyncSnapshot<List<IncomeCategory>> snapshot) {
+          if (snapshot.hasData) {
+            return DropdownButton<int>(
+              hint: new Text("Select Category"),
+              value: category,
+              items: snapshot.data
+                  .map((cat) => DropdownMenuItem<int>(
+                      child: Text(cat.name), value: cat.id))
+                  .toList(),
+              onChanged: (int value) {
+                setState(() {
+                  category = value;
+                });
+              },
+              isExpanded: true,
+            );
+          } else {
+            return Container();
+          }
         });
-      },
-      isExpanded: true,
-    );
   }
 
   Widget buildAmount() {
@@ -207,13 +203,22 @@ class _AddIncomeState extends State<AddIncome> {
                           formkey.currentState.save();
                           var newIncomeTransaction = IncomeTransaction(
                               name: name,
-                              category: "account",
-                              date: date,
-                              amount: amount.toString(),
-                              reoccur: "false");
+                              category: category,
+                              date: date.substring(
+                                0,
+                              ),
+                              amount: amount,
+                              reoccur: boolcheck(reoccur));
 
                           DBProvider.db
                               .newIncomeTransaction(newIncomeTransaction);
+
+                          Navigator.push(
+                              context,
+                              PageTransition(
+                                  type: PageTransitionType.fade,
+                                  duration: Duration(microseconds: 4),
+                                  child: HomeScreen()));
                         },
                         child: Text(
                           'Add Income',

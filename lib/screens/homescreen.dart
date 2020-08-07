@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:money_tree/models/IncomeTransaction_model.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,20 +17,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   //current operation selected
   int current = -1;
-
-  Map<String, String> newIncomeTransactions = {};
-  Future _incometransactionfuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _incometransactionfuture = getIncomeTransaction();
-  }
-
-  getIncomeTransaction() async {
-    final _transactionData = await DBProvider.db.getIncomeTransaction();
-    return _transactionData;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -280,102 +267,97 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            Container(
-              child: ListView.builder(
-                itemCount: transactions.length,
-                padding: EdgeInsets.only(left: 16, right: 16),
-                shrinkWrap: true,
-                physics: BouncingScrollPhysics(),
-                itemBuilder: (context, index) {
-                  return Container(
-                    height: 70,
-                    margin: EdgeInsets.only(bottom: 13),
-                    padding: EdgeInsets.only(
-                        left: 24, top: 12, bottom: 12, right: 22),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 5,
-                          spreadRadius: 1,
-                          offset: Offset(0, 2.0),
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Row(
+            FutureBuilder<List<IncomeTransaction>>(
+              future: DBProvider.db.getIncomeTransaction(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<List<IncomeTransaction>> snapshot) {
+                if (snapshot.hasData) {
+                  return ListView.builder(
+                    itemCount: snapshot.data.length,
+                    padding: EdgeInsets.only(left: 16, right: 16),
+                    shrinkWrap: true,
+                    physics: BouncingScrollPhysics(),
+                    itemBuilder: (BuildContext context, int index) {
+                      IncomeTransaction it = snapshot.data[index];
+                      return Container(
+                        height: 91,
+                        margin: EdgeInsets.only(bottom: 13),
+                        padding: EdgeInsets.only(
+                            left: 24, top: 12, bottom: 12, right: 22),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 5,
+                              spreadRadius: 1,
+                              offset: Offset(0, 2.0),
+                            )
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
+                            Row(
+                              children: <Widget>[
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Text(
+                                      it.name,
+                                      style: GoogleFonts.inter(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.black),
+                                    ),
+                                    Text(
+                                      it.date,
+                                      style: GoogleFonts.inter(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.grey),
+                                    ),
+                                    Text(
+                                      it.category.toString(),
+                                      style: GoogleFonts.inter(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.grey),
+                                    ),
+                                    Text(
+                                      it.reoccur.toString(),
+                                      style: GoogleFonts.inter(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Row(
                               children: <Widget>[
                                 Text(
-                                  transactions[index].name,
+                                  it.amount.toString(),
                                   style: GoogleFonts.inter(
-                                      fontSize: 16,
+                                      fontSize: 15,
                                       fontWeight: FontWeight.w700,
-                                      color: Colors.black),
-                                ),
-                                Text(
-                                  transactions[index].date,
-                                  style: GoogleFonts.inter(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.grey),
+                                      color: Color(0xFF1B239F)),
                                 )
                               ],
                             ),
                           ],
                         ),
-                        Row(
-                          children: <Widget>[
-                            Text(
-                              transactions[index].amount,
-                              style: GoogleFonts.inter(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF1B239F)),
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            FutureBuilder(
-                future: _incometransactionfuture,
-                builder: (_, incometransactiondata) {
-                  switch (incometransactiondata.connectionState) {
-                    case ConnectionState.none:
-                      return Container();
-                    case ConnectionState.waiting:
-                      return Container();
-                    case ConnectionState.active:
-                    case ConnectionState.done:
-                      if (!newIncomeTransactions.containsKey('name')) {
-                        newIncomeTransactions = Map<String, String>.from(
-                            incometransactiondata.data);
-                      }
-
-                      return Column(
-                        children: <Widget>[
-                          Text(newIncomeTransactions['name']),
-                          Text(newIncomeTransactions['category']),
-                          Text(newIncomeTransactions['date']),
-                          Text(newIncomeTransactions['amount']),
-                          Text(newIncomeTransactions['reoccur']),
-                        ],
                       );
-                  }
+                    },
+                  );
+                } else {
                   return Container();
-                })
+                }
+              },
+            ),
           ],
         ),
       ),

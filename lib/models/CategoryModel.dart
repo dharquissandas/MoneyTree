@@ -1,26 +1,25 @@
 import 'dart:convert';
 
-IncomeCategory incomeCategoryFromJson(String str) {
+Category incomeCategoryFromJson(String str) {
   final jsonData = json.decode(str);
-  return IncomeCategory.fromMap(jsonData);
+  return Category.fromMap(jsonData);
 }
 
-String incomeCategoryToJson(IncomeCategory data) {
+String incomeCategoryToJson(Category data) {
   final dyn = data.toMap();
   return json.encode(dyn);
 }
 
-class IncomeCategory {
+class Category {
   int id;
   String name;
 
-  IncomeCategory({
+  Category({
     this.id,
     this.name,
   });
 
-  factory IncomeCategory.fromMap(Map<String, dynamic> json) =>
-      new IncomeCategory(
+  factory Category.fromMap(Map<String, dynamic> json) => new Category(
         id: json["id"],
         name: json["name"],
       );

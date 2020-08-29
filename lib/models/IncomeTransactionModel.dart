@@ -16,6 +16,7 @@ class IncomeTransaction {
   String date;
   int category;
   double amount;
+  int bankCard;
   int reoccur;
 
   IncomeTransaction({
@@ -24,6 +25,7 @@ class IncomeTransaction {
     this.date,
     this.category,
     this.amount,
+    this.bankCard,
     this.reoccur,
   });
 
@@ -34,6 +36,7 @@ class IncomeTransaction {
         date: json["date"],
         category: json["category"],
         amount: json["amount"].toDouble(),
+        bankCard: json["bankcard"],
         reoccur: json["reoccur"],
       );
 
@@ -43,6 +46,7 @@ class IncomeTransaction {
         "date": date,
         "category": category,
         "amount": amount,
+        "bankcard": bankCard,
         "reoccur": reoccur,
       };
 }

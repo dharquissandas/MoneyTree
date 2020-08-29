@@ -1,30 +1,28 @@
 import 'package:currency_textfield/currency_textfield.dart';
-import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/models/CategoryModel.dart';
-import 'package:money_tree/models/IncomeTransactionModel.dart';
+import 'package:money_tree/models/ExpenseTransactionModel.dart';
 import 'package:money_tree/utils/Database.dart';
 
-int incomeid = -1;
-String incomename;
-String incomedate = DateTime.now().toIso8601String();
-int incomebankcard;
-int incomecategory;
-double incomeamount;
-bool incomereoccur = false;
+GlobalKey<FormState> expenseformkey = GlobalKey<FormState>();
 
-final GlobalKey<FormState> incomeformkey = GlobalKey<FormState>();
+int expenseid = -1;
+String expensename;
+String expensedate = DateTime.now().toIso8601String();
+int expensecategory;
+int expensebankcard;
+double expenseamount;
+bool expensereoccur = false;
 
-class AddIncome extends StatefulWidget {
-  final IncomeTransaction transaction;
-  AddIncome({Key key, @required this.transaction}) : super(key: key);
-
+class AddExpense extends StatefulWidget {
+  final ExpenseTransaction transaction;
+  AddExpense({Key key, @required this.transaction}) : super(key: key);
   @override
-  _AddIncomeState createState() => _AddIncomeState();
+  _AddExpenseState createState() => _AddExpenseState();
 }
 
-class _AddIncomeState extends State<AddIncome> {
+class _AddExpenseState extends State<AddExpense> {
   TextEditingController _date = new TextEditingController();
   TextEditingController namecontroller = new TextEditingController();
   var currencycontroller = CurrencyTextFieldController(
@@ -34,28 +32,21 @@ class _AddIncomeState extends State<AddIncome> {
   void initState() {
     super.initState();
     if (widget.transaction != null) {
-      incomeid = widget.transaction.id;
-      incomename = widget.transaction.name;
+      expenseid = widget.transaction.id;
+      expensename = widget.transaction.name;
       namecontroller.text = widget.transaction.name;
 
-      incomedate = widget.transaction.date;
+      expensedate = widget.transaction.date;
       _date.text = widget.transaction.date;
 
-      incomebankcard = widget.transaction.bankCard;
-      incomecategory = widget.transaction.category;
+      expensebankcard = widget.transaction.bankCard;
+      expensecategory = widget.transaction.category;
 
-      incomeamount = widget.transaction.amount;
+      expenseamount = widget.transaction.amount;
       currencycontroller.text = widget.transaction.amount.toString();
 
-      incomereoccur = widget.transaction.reoccur == 0 ? false : true;
+      expensereoccur = widget.transaction.reoccur == 0 ? false : true;
     }
-  }
-
-  int boolcheck(bool reoccur) {
-    if (reoccur) {
-      return 1;
-    }
-    return 0;
   }
 
   Future<Null> _buildDate(BuildContext context) async {
@@ -67,7 +58,7 @@ class _AddIncomeState extends State<AddIncome> {
 
     if (picked != null) {
       setState(() {
-        incomedate = picked.toIso8601String().substring(0, 10);
+        expensedate = picked.toIso8601String().substring(0, 10);
         _date.value =
             TextEditingValue(text: picked.toString().substring(0, 10));
       });
@@ -78,7 +69,7 @@ class _AddIncomeState extends State<AddIncome> {
     return TextFormField(
       autocorrect: true,
       controller: namecontroller,
-      decoration: InputDecoration(labelText: "Income Source"),
+      decoration: InputDecoration(labelText: "Expense Source"),
       textCapitalization: TextCapitalization.sentences,
       validator: (value) {
         if (value.isEmpty) {
@@ -86,7 +77,7 @@ class _AddIncomeState extends State<AddIncome> {
         }
       },
       onSaved: (String value) {
-        incomename = value;
+        expensename = value;
       },
     );
   }
@@ -99,7 +90,7 @@ class _AddIncomeState extends State<AddIncome> {
           controller: _date,
           keyboardType: TextInputType.datetime,
           decoration: InputDecoration(
-            labelText: 'Date of Income',
+            labelText: 'Date of Expense',
           ),
         ),
       ),
@@ -108,20 +99,20 @@ class _AddIncomeState extends State<AddIncome> {
 
   Widget buildCategory() {
     return FutureBuilder<List<Category>>(
-        future: DBProvider.db.getIncomeCategories(),
+        future: DBProvider.db.getExpenseCategories(),
         builder:
             (BuildContext context, AsyncSnapshot<List<Category>> snapshot) {
           if (snapshot.hasData) {
             return DropdownButton<int>(
               hint: new Text("Select Category"),
-              value: incomecategory,
+              value: expensecategory,
               items: snapshot.data
                   .map((cat) => DropdownMenuItem<int>(
                       child: Text(cat.name), value: cat.id))
                   .toList(),
               onChanged: (int value) {
                 setState(() {
-                  incomecategory = value;
+                  expensecategory = value;
                 });
               },
               isExpanded: true,
@@ -140,7 +131,7 @@ class _AddIncomeState extends State<AddIncome> {
           if (snapshot.hasData) {
             return DropdownButton<int>(
               hint: new Text("Select Bank Card"),
-              value: incomebankcard,
+              value: expensebankcard,
               items: snapshot.data.map((cat) {
                 return DropdownMenuItem<int>(
                     child: Text(cat.cardType +
@@ -150,7 +141,7 @@ class _AddIncomeState extends State<AddIncome> {
               }).toList(),
               onChanged: (int value) {
                 setState(() {
-                  incomebankcard = value;
+                  expensebankcard = value;
                 });
               },
               isExpanded: true,
@@ -165,27 +156,27 @@ class _AddIncomeState extends State<AddIncome> {
     return TextFormField(
       controller: currencycontroller,
       keyboardType: TextInputType.number,
-      decoration: InputDecoration(labelText: "Income Amount"),
+      decoration: InputDecoration(labelText: "Expense Amount"),
       validator: (value) {
         if (value.isEmpty) {
           return 'Amount is Required';
         }
       },
       onSaved: (value) {
-        incomeamount = currencycontroller.doubleValue;
+        expenseamount = currencycontroller.doubleValue;
       },
     );
   }
 
   Widget buildReoccur() {
     return CheckboxListTile(
-      value: incomereoccur,
+      value: expensereoccur,
       onChanged: (value) {
         setState(() {
-          incomereoccur = value;
+          expensereoccur = value;
         });
       },
-      title: new Text("Recurring Income"),
+      title: new Text("Recurring Expense"),
       controlAffinity: ListTileControlAffinity.leading,
     );
   }
@@ -200,14 +191,14 @@ class _AddIncomeState extends State<AddIncome> {
         backgroundColor: Colors.white,
         centerTitle: true,
         title: Text(
-          "Add Income",
+          "Add Expense",
           style: TextStyle(color: Colors.black),
         ),
       ),
       body: Container(
         padding: EdgeInsets.only(left: 16, right: 16),
         child: Form(
-          key: incomeformkey,
+          key: expenseformkey,
           child: Column(
             children: <Widget>[
               buildName(),

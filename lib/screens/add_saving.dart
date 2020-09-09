@@ -7,8 +7,10 @@ import 'package:money_tree/utils/Database.dart';
 int paymentaccount;
 double paymentamount;
 int saving;
-String paymentdate = DateTime.now().toIso8601String();
+String paymentdate = DateTime.now().toIso8601String().substring(0, 10);
 bool savingreoccur = false;
+BankCard selectedPaymentCard;
+Saving selectedSaving;
 
 final GlobalKey<FormState> savingpaymentkey = GlobalKey<FormState>();
 
@@ -18,6 +20,17 @@ class AddSaving extends StatefulWidget {
 }
 
 class _AddSavingState extends State<AddSaving> {
+  @override
+  void initState() {
+    setState(() {
+      _date.value =
+          TextEditingValue(text: DateTime.now().toString().substring(0, 10));
+      saving = null;
+      paymentaccount = null;
+    });
+    super.initState();
+  }
+
   int boolcheck(bool reoccur) {
     if (reoccur) {
       return 1;
@@ -31,10 +44,11 @@ class _AddSavingState extends State<AddSaving> {
 
   Future<Null> _buildDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(1901, 1),
-        lastDate: DateTime.now());
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1901, 1),
+      lastDate: DateTime(2025, 1),
+    );
 
     if (picked != null) {
       setState(() {
@@ -51,7 +65,7 @@ class _AddSavingState extends State<AddSaving> {
         builder:
             (BuildContext context, AsyncSnapshot<List<BankCard>> snapshot) {
           if (snapshot.hasData) {
-            return DropdownButton<int>(
+            return DropdownButtonFormField<int>(
               hint: new Text("Select Bank Card"),
               value: paymentaccount,
               items: snapshot.data.map((cat) {
@@ -62,11 +76,21 @@ class _AddSavingState extends State<AddSaving> {
                     value: cat.id);
               }).toList(),
               onChanged: (int value) {
+                DBProvider.db.getBankCardById(value).then((bc) {
+                  setState(() {
+                    selectedPaymentCard = bc;
+                  });
+                });
                 setState(() {
                   paymentaccount = value;
                 });
               },
               isExpanded: true,
+              validator: (value) {
+                if (paymentaccount == null) {
+                  return 'Please Select Bank Card';
+                }
+              },
             );
           } else {
             return Container();
@@ -79,7 +103,7 @@ class _AddSavingState extends State<AddSaving> {
         future: DBProvider.db.getSavings(),
         builder: (BuildContext context, AsyncSnapshot<List<Saving>> snapshot) {
           if (snapshot.hasData) {
-            return DropdownButton<int>(
+            return DropdownButtonFormField<int>(
               hint: new Text("Select Saving"),
               value: saving,
               items: snapshot.data.map((s) {
@@ -87,11 +111,21 @@ class _AddSavingState extends State<AddSaving> {
                     child: Text(s.savingsItem), value: s.id);
               }).toList(),
               onChanged: (int value) {
+                DBProvider.db.getSavingById(value).then((s) {
+                  setState(() {
+                    selectedSaving = s;
+                  });
+                });
                 setState(() {
                   saving = value;
                 });
               },
               isExpanded: true,
+              validator: (value) {
+                if (paymentaccount == null) {
+                  return 'Please Select Saving';
+                }
+              },
             );
           } else {
             return Container();
@@ -107,6 +141,13 @@ class _AddSavingState extends State<AddSaving> {
       validator: (value) {
         if (value.isEmpty) {
           return 'Amount is Required';
+        }
+        if (controller.doubleValue > selectedPaymentCard.amount) {
+          return 'Insufficiant Funds on Payment Card';
+        }
+        if (controller.doubleValue >
+            selectedSaving.totalAmount - selectedSaving.amountSaved) {
+          return 'Payment Surpasses Remaining Savings Amount';
         }
       },
       onSaved: (value) {
@@ -163,8 +204,8 @@ class _AddSavingState extends State<AddSaving> {
             children: <Widget>[
               buildSavingCategory(),
               buildCardCategory(),
-              buildSavingAmount(),
               buildDate(),
+              buildSavingAmount(),
               buildReoccur()
             ],
           ),

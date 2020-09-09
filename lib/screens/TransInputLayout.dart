@@ -90,6 +90,9 @@ class _TransInputState extends State<TransInput> {
               DBProvider.db
                   .updateIncomeTransaction(incomeid, updatedIncomeTransaction);
             }
+            incomeformkey.currentState.reset();
+            incomebankcard = null;
+            incomecategory = null;
           } else if (pageIndex == 1) {
             if (!expenseformkey.currentState.validate()) {
               return;
@@ -118,6 +121,9 @@ class _TransInputState extends State<TransInput> {
               DBProvider.db.updateExpenseTransaction(
                   expenseid, updatedExpenseTransaction);
             }
+            expenseformkey.currentState.reset();
+            expensebankcard = null;
+            expensecategory = null;
           } else if (pageIndex == 2) {
             if (!savingpaymentkey.currentState.validate()) {
               return;
@@ -131,8 +137,10 @@ class _TransInputState extends State<TransInput> {
                 paymentdate: paymentdate,
                 savingreoccur: boolcheck(savingreoccur));
 
-            print(newSavingTransaction.paymentamount);
             DBProvider.db.newSavingTransaction(newSavingTransaction);
+            savingpaymentkey.currentState.reset();
+            saving = null;
+            paymentaccount = null;
           }
           Navigator.pushAndRemoveUntil(
               context,

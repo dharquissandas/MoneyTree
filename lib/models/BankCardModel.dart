@@ -13,6 +13,7 @@ String bankCardToJson(BankCard data) {
 class BankCard {
   int id;
   int cardNumber;
+  int cardOrder;
   String cardName;
   String expiryDate;
   double amount;
@@ -21,6 +22,7 @@ class BankCard {
   BankCard({
     this.id,
     this.cardNumber,
+    this.cardOrder,
     this.cardName,
     this.expiryDate,
     this.amount,
@@ -30,6 +32,7 @@ class BankCard {
   factory BankCard.fromMap(Map<String, dynamic> json) => new BankCard(
         id: json["id"],
         cardNumber: json["cardnumber"],
+        cardOrder: json["cardorder"],
         cardName: json["cardname"],
         expiryDate: json["expirydate"],
         amount: json["amount"].toDouble(),
@@ -39,6 +42,7 @@ class BankCard {
   Map<String, dynamic> toMap() => {
         "id": id,
         "cardnumber": cardNumber,
+        "cardorder": cardOrder,
         "cardname": cardName,
         "expirydate": expiryDate,
         "amount": amount,

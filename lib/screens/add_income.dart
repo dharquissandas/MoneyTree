@@ -1,6 +1,6 @@
 import 'package:currency_textfield/currency_textfield.dart';
-import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/models/CategoryModel.dart';
 import 'package:money_tree/models/IncomeTransactionModel.dart';
@@ -8,7 +8,7 @@ import 'package:money_tree/utils/Database.dart';
 
 int incomeid = -1;
 String incomename;
-String incomedate = DateTime.now().toIso8601String();
+String incomedate = DateTime.now().toIso8601String().substring(0, 10);
 int incomebankcard;
 int incomecategory;
 double incomeamount;
@@ -45,9 +45,19 @@ class _AddIncomeState extends State<AddIncome> {
       incomecategory = widget.transaction.category;
 
       incomeamount = widget.transaction.amount;
-      currencycontroller.text = widget.transaction.amount.toString();
+      currencycontroller.text =
+          FlutterMoneyFormatter(amount: widget.transaction.amount)
+              .output
+              .nonSymbol;
 
       incomereoccur = widget.transaction.reoccur == 0 ? false : true;
+    } else {
+      setState(() {
+        incomebankcard = null;
+        incomecategory = null;
+        _date.value =
+            TextEditingValue(text: DateTime.now().toString().substring(0, 10));
+      });
     }
   }
 
@@ -112,7 +122,7 @@ class _AddIncomeState extends State<AddIncome> {
         builder:
             (BuildContext context, AsyncSnapshot<List<Category>> snapshot) {
           if (snapshot.hasData) {
-            return DropdownButton<int>(
+            return DropdownButtonFormField<int>(
               hint: new Text("Select Category"),
               value: incomecategory,
               items: snapshot.data
@@ -125,6 +135,11 @@ class _AddIncomeState extends State<AddIncome> {
                 });
               },
               isExpanded: true,
+              validator: (value) {
+                if (incomecategory == null) {
+                  return 'Please Select Income Category';
+                }
+              },
             );
           } else {
             return Container();
@@ -138,7 +153,7 @@ class _AddIncomeState extends State<AddIncome> {
         builder:
             (BuildContext context, AsyncSnapshot<List<BankCard>> snapshot) {
           if (snapshot.hasData) {
-            return DropdownButton<int>(
+            return DropdownButtonFormField<int>(
               hint: new Text("Select Bank Card"),
               value: incomebankcard,
               items: snapshot.data.map((cat) {
@@ -154,6 +169,11 @@ class _AddIncomeState extends State<AddIncome> {
                 });
               },
               isExpanded: true,
+              validator: (value) {
+                if (incomebankcard == null) {
+                  return 'Please Select Bank Card';
+                }
+              },
             );
           } else {
             return Container();

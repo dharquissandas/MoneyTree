@@ -1,12 +1,15 @@
 import 'package:currency_textfield/currency_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:money_tree/models/BankCardModel.dart';
+import 'package:money_tree/screens/CardOrganiser.dart';
 import 'package:money_tree/screens/HomeLayout.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:flutter/services.dart';
 
 class AddBankCard extends StatefulWidget {
+  final BankCard bc;
+  AddBankCard({Key key, @required this.bc}) : super(key: key);
   @override
   _AddBankCardState createState() => _AddBankCardState();
 }
@@ -14,13 +17,50 @@ class AddBankCard extends StatefulWidget {
 class _AddBankCardState extends State<AddBankCard> {
   int id;
   int cardNumber;
+  int cardOrder = 0;
   String cardName;
   String expiryDate;
   double amount;
   String cardType;
 
+  @override
+  void initState() {
+    if (widget.bc != null) {
+      id = widget.bc.id;
+
+      cardNumber = widget.bc.cardNumber;
+      cardnumbercontroller.text = widget.bc.cardNumber.toString();
+
+      cardOrder = widget.bc.cardOrder;
+
+      cardName = widget.bc.cardName;
+      cardnamecontroller.text = widget.bc.cardName;
+
+      expiryDate = widget.bc.expiryDate;
+      _date.text = widget.bc.expiryDate;
+
+      amount = widget.bc.amount;
+      controller.text = widget.bc.amount.toString();
+
+      cardType = widget.bc.cardType;
+    } else {
+      DBProvider.db.getBankCards().then((value) {
+        if (value.length > 1) {
+          setState(() {
+            cardOrder = value.last.cardOrder + 1;
+          });
+        }
+      });
+    }
+    super.initState();
+  }
+
   final GlobalKey<FormState> formkey = GlobalKey<FormState>();
+
   TextEditingController _date = new TextEditingController();
+  TextEditingController cardnamecontroller = new TextEditingController();
+  TextEditingController cardnumbercontroller = new TextEditingController();
+
   var controller = CurrencyTextFieldController(
       rightSymbol: "£", decimalSymbol: ".", thousandSymbol: ",");
 
@@ -41,7 +81,7 @@ class _AddBankCardState extends State<AddBankCard> {
     }
   }
 
-  String selectedCard = "Visa";
+  var selectedCard;
   List<DropdownMenuItem<String>> cardNetworks = [];
 
   void loadCardNetworks() {
@@ -67,6 +107,7 @@ class _AddBankCardState extends State<AddBankCard> {
   Widget buildNameOnCard() {
     return TextFormField(
       autocorrect: true,
+      controller: cardnamecontroller,
       decoration: InputDecoration(labelText: "Name On Card"),
       textCapitalization: TextCapitalization.sentences,
       validator: (value) {
@@ -82,6 +123,7 @@ class _AddBankCardState extends State<AddBankCard> {
 
   Widget buildCardNumber() {
     return TextFormField(
+      controller: cardnumbercontroller,
       inputFormatters: [
         new LengthLimitingTextInputFormatter(4),
       ],
@@ -132,6 +174,7 @@ class _AddBankCardState extends State<AddBankCard> {
   Widget buildAmount() {
     return TextFormField(
       controller: controller,
+      //enabled: widget.bc == null ? true : false,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(labelText: "Card Amount"),
       validator: (value) {
@@ -159,6 +202,54 @@ class _AddBankCardState extends State<AddBankCard> {
           style: TextStyle(color: Colors.black),
         ),
       ),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: 12),
+        child: FloatingActionButton.extended(
+            icon: Icon(Icons.check),
+            backgroundColor: Colors.teal[300],
+            elevation: 20,
+            label: Text("Confirm"),
+            onPressed: () {
+              if (!formkey.currentState.validate()) {
+                return;
+              }
+              formkey.currentState.save();
+
+              if (widget.bc != null) {
+                BankCard bankcard = BankCard(
+                    id: id,
+                    cardNumber: cardNumber,
+                    cardOrder: cardOrder,
+                    cardName: cardName,
+                    expiryDate: expiryDate,
+                    amount: amount,
+                    cardType: cardType);
+
+                DBProvider.db.updateBankCard(id, bankcard);
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    PageTransition(
+                        type: PageTransitionType.leftToRight,
+                        child: CardOrganiser()),
+                    (route) => false);
+              } else {
+                BankCard bankcard = BankCard(
+                    cardNumber: cardNumber,
+                    cardOrder: cardOrder,
+                    cardName: cardName,
+                    expiryDate: expiryDate,
+                    amount: amount,
+                    cardType: cardType);
+
+                DBProvider.db.newCard(bankcard);
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    PageTransition(
+                        type: PageTransitionType.leftToRight, child: Home()),
+                    (route) => false);
+              }
+            }),
+      ),
       body: Container(
         margin: EdgeInsets.only(top: 8),
         child: ListView(
@@ -175,37 +266,6 @@ class _AddBankCardState extends State<AddBankCard> {
                     buildExpiryDate(),
                     buildCardNetworkCategory(),
                     buildAmount(),
-                    SizedBox(
-                      height: 100,
-                    ),
-                    RaisedButton(
-                      onPressed: () {
-                        if (!formkey.currentState.validate()) {
-                          return;
-                        }
-                        formkey.currentState.save();
-
-                        BankCard bankcard = BankCard(
-                            cardNumber: cardNumber,
-                            cardName: cardName,
-                            expiryDate: expiryDate,
-                            amount: amount,
-                            cardType: cardType);
-
-                        DBProvider.db.newCard(bankcard);
-
-                        Navigator.push(
-                            context,
-                            PageTransition(
-                                type: PageTransitionType.fade,
-                                duration: Duration(microseconds: 4),
-                                child: Home()));
-                      },
-                      child: Text(
-                        'Add Card',
-                        style: TextStyle(color: Colors.blue, fontSize: 16),
-                      ),
-                    )
                   ],
                 ),
               ),

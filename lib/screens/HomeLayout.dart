@@ -7,8 +7,7 @@ import 'package:money_tree/screens/TreesPage.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:money_tree/screens/ExpensePage.dart';
 import 'package:money_tree/screens/IncomePage.dart';
-
-import 'add_bankcard.dart';
+import 'SavingsOrganiser.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -59,6 +58,7 @@ class _HomeState extends State<Home> {
             ListTile(
                 title: Text('Cards Organiser'),
                 onTap: () {
+                  Navigator.pop(context);
                   Navigator.push(
                       context,
                       PageTransition(
@@ -66,10 +66,14 @@ class _HomeState extends State<Home> {
                           child: CardOrganiser()));
                 }),
             ListTile(
-              title: Text('Savings Organiser'),
+              title: Text('Saving Tree Organiser'),
               onTap: () {
-                // Update the state of the app.
-                // ...
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    PageTransition(
+                        type: PageTransitionType.rightToLeft,
+                        child: SavingsOrganiser()));
               },
             ),
           ],

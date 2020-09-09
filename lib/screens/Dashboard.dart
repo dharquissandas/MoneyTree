@@ -65,7 +65,9 @@ class _DashboardState extends State<Dashboard> {
                           context,
                           PageTransition(
                               type: PageTransitionType.rightToLeft,
-                              child: AddBankCard()));
+                              child: AddBankCard(
+                                bc: null,
+                              )));
                     },
                     color: Colors.teal[300],
                     textColor: Colors.white,
@@ -565,7 +567,7 @@ class _DashboardState extends State<Dashboard> {
                                         style: GoogleFonts.inter(
                                             fontSize: 15,
                                             fontWeight: FontWeight.w700,
-                                            color: Color(0xFF1B239F)),
+                                            color: Colors.teal[300]),
                                       ),
                                       InkWell(
                                         onTap: () {
@@ -640,7 +642,7 @@ class _DashboardState extends State<Dashboard> {
                               Navigator.push(
                                   context,
                                   PageTransition(
-                                      type: PageTransitionType.downToUp,
+                                      type: PageTransitionType.rightToLeft,
                                       child: TransInput(
                                         page: 1,
                                         transaction: et,
@@ -712,7 +714,7 @@ class _DashboardState extends State<Dashboard> {
                                         style: GoogleFonts.inter(
                                             fontSize: 15,
                                             fontWeight: FontWeight.w700,
-                                            color: Color(0xFF1B239F)),
+                                            color: Colors.teal[300]),
                                       ),
                                       InkWell(
                                         onTap: () {

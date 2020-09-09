@@ -1,5 +1,6 @@
 import 'package:currency_textfield/currency_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/models/CategoryModel.dart';
 import 'package:money_tree/models/ExpenseTransactionModel.dart';
@@ -9,11 +10,12 @@ GlobalKey<FormState> expenseformkey = GlobalKey<FormState>();
 
 int expenseid = -1;
 String expensename;
-String expensedate = DateTime.now().toIso8601String();
+String expensedate = DateTime.now().toIso8601String().substring(0, 10);
 int expensecategory;
 int expensebankcard;
 double expenseamount;
 bool expensereoccur = false;
+BankCard selectedExpenseCard;
 
 class AddExpense extends StatefulWidget {
   final ExpenseTransaction transaction;
@@ -43,9 +45,19 @@ class _AddExpenseState extends State<AddExpense> {
       expensecategory = widget.transaction.category;
 
       expenseamount = widget.transaction.amount;
-      currencycontroller.text = widget.transaction.amount.toString();
+      currencycontroller.text =
+          FlutterMoneyFormatter(amount: widget.transaction.amount)
+              .output
+              .nonSymbol;
 
       expensereoccur = widget.transaction.reoccur == 0 ? false : true;
+    } else {
+      setState(() {
+        expensebankcard = null;
+        expensecategory = null;
+        _date.value =
+            TextEditingValue(text: DateTime.now().toString().substring(0, 10));
+      });
     }
   }
 
@@ -103,7 +115,7 @@ class _AddExpenseState extends State<AddExpense> {
         builder:
             (BuildContext context, AsyncSnapshot<List<Category>> snapshot) {
           if (snapshot.hasData) {
-            return DropdownButton<int>(
+            return DropdownButtonFormField<int>(
               hint: new Text("Select Category"),
               value: expensecategory,
               items: snapshot.data
@@ -116,6 +128,11 @@ class _AddExpenseState extends State<AddExpense> {
                 });
               },
               isExpanded: true,
+              validator: (value) {
+                if (expensecategory == null) {
+                  return 'Please Select Expense Category';
+                }
+              },
             );
           } else {
             return Container();
@@ -129,7 +146,7 @@ class _AddExpenseState extends State<AddExpense> {
         builder:
             (BuildContext context, AsyncSnapshot<List<BankCard>> snapshot) {
           if (snapshot.hasData) {
-            return DropdownButton<int>(
+            return DropdownButtonFormField<int>(
               hint: new Text("Select Bank Card"),
               value: expensebankcard,
               items: snapshot.data.map((cat) {
@@ -140,11 +157,21 @@ class _AddExpenseState extends State<AddExpense> {
                     value: cat.id);
               }).toList(),
               onChanged: (int value) {
+                DBProvider.db.getBankCardById(value).then((bc) {
+                  setState(() {
+                    selectedExpenseCard = bc;
+                  });
+                });
                 setState(() {
                   expensebankcard = value;
                 });
               },
               isExpanded: true,
+              validator: (value) {
+                if (expensebankcard == null) {
+                  return 'Please Select Bank Card';
+                }
+              },
             );
           } else {
             return Container();
@@ -160,6 +187,9 @@ class _AddExpenseState extends State<AddExpense> {
       validator: (value) {
         if (value.isEmpty) {
           return 'Amount is Required';
+        }
+        if (currencycontroller.doubleValue > selectedExpenseCard.amount) {
+          return 'Insufficiant Funds to Add Transaction';
         }
       },
       onSaved: (value) {

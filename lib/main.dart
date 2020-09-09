@@ -5,8 +5,8 @@ import 'screens/HomeLayout.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    systemNavigationBarColor: Colors.white, // navigation bar color
-  ));
+      //systemNavigationBarColor: Colors.white, // navigation bar color
+      ));
   runApp(MyApp());
 }
 

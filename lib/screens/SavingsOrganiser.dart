@@ -2,29 +2,27 @@ import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:money_tree/models/BankCardModel.dart';
-import 'package:money_tree/screens/HomeLayout.dart';
-import 'package:money_tree/screens/add_bankcard.dart';
+import 'package:money_tree/models/SavingsModel.dart';
+import 'package:money_tree/screens/add_saving_goal.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:page_transition/page_transition.dart';
 
-class CardOrganiser extends StatefulWidget {
+import 'HomeLayout.dart';
+
+class SavingsOrganiser extends StatefulWidget {
   @override
-  _CardOrganiserState createState() => _CardOrganiserState();
+  _SavingsOrganiserState createState() => _SavingsOrganiserState();
 }
 
-class _CardOrganiserState extends State<CardOrganiser> {
-  List<BankCard> bclist = List<BankCard>();
+class _SavingsOrganiserState extends State<SavingsOrganiser> {
+  List<Saving> slist = List<Saving>();
 
   @override
   void initState() {
-    DBProvider.db.getBankCards().then((value) {
+    DBProvider.db.getSavings().then((value) {
       setState(() {
-        bclist = value;
+        slist = value;
       });
-      for (var i = 0; i < bclist.length; i++) {
-        print(bclist[i].cardOrder);
-      }
     });
     super.initState();
   }
@@ -36,7 +34,7 @@ class _CardOrganiserState extends State<CardOrganiser> {
         backgroundColor: Colors.white,
         iconTheme: IconThemeData(color: Colors.black),
         title: Text(
-          "Organise Bank Cards",
+          "Organise Saving Trees",
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
@@ -49,10 +47,9 @@ class _CardOrganiserState extends State<CardOrganiser> {
             elevation: 20,
             label: Text("Confirm"),
             onPressed: () {
-              for (var i = 0; i < bclist.length; i++) {
-                DBProvider.db.updateBankCardOrder(i, bclist[i].id);
+              for (var i = 0; i < slist.length; i++) {
+                DBProvider.db.updateSavingOrder(i, slist[i].id);
               }
-
               Navigator.pushAndRemoveUntil(
                   context,
                   PageTransition(
@@ -69,39 +66,40 @@ class _CardOrganiserState extends State<CardOrganiser> {
                 if (newIndex > oldIndex) {
                   newIndex -= 1;
                 }
-                final BankCard item = bclist.removeAt(oldIndex);
-                item.cardOrder = newIndex;
-                bclist.insert(newIndex, item);
+                final Saving item = slist.removeAt(oldIndex);
+                item.savingOrder = newIndex;
+                slist.insert(newIndex, item);
               },
             );
           },
           children: List.generate(
-            bclist.length,
+            slist.length,
             (index) {
-              BankCard bc = bclist[index];
+              Saving s = slist[index];
               return GestureDetector(
-                key: Key(bc.id.toString()),
+                key: Key(s.id.toString()),
                 onTap: () {
                   Navigator.push(
                     context,
                     PageTransition(
-                        type: PageTransitionType.rightToLeft,
-                        child: AddBankCard(
-                          bc: bc,
-                        )),
+                      type: PageTransitionType.rightToLeft,
+                      child: AddSavingGoal(
+                        s: s,
+                      ),
+                    ),
                   );
                 },
                 child: Dismissible(
-                  key: Key(bc.id.toString()),
+                  key: Key(s.id.toString()),
                   confirmDismiss: (DismissDirection direction) async {
                     return await showDialog(
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          key: Key(bc.id.toString()),
-                          title: const Text("Delete Card"),
+                          key: Key(s.id.toString()),
+                          title: const Text("Delete Saving Tree"),
                           content: const Text(
-                              "Deleting this card will also delete all transactions associated with this card. Do you wish to delete this card?"),
+                              "Deleting this saving will also delete all transactions associated with this saving. Do you wish to delete this saving?"),
                           actions: <Widget>[
                             FlatButton(
                                 onPressed: () =>
@@ -117,10 +115,10 @@ class _CardOrganiserState extends State<CardOrganiser> {
                     );
                   },
                   onDismissed: (direction) {
-                    DBProvider.db.deleteBankCardById(bc.id);
+                    DBProvider.db.deleteSavingGoal(s.id);
                   },
                   child: Container(
-                    key: Key(bc.id.toString()),
+                    key: Key(s.id.toString()),
                     height: 70,
                     margin: EdgeInsets.only(bottom: 13),
                     padding: EdgeInsets.only(
@@ -147,7 +145,7 @@ class _CardOrganiserState extends State<CardOrganiser> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
                                 Text(
-                                  bc.cardName,
+                                  s.savingsItem,
                                   style: GoogleFonts.inter(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
@@ -156,12 +154,10 @@ class _CardOrganiserState extends State<CardOrganiser> {
                                 Text(
                                   formatDate(
                                       DateTime(
+                                          int.parse(s.goalDate.substring(0, 4)),
+                                          int.parse(s.goalDate.substring(5, 7)),
                                           int.parse(
-                                              bc.expiryDate.substring(0, 4)),
-                                          int.parse(
-                                              bc.expiryDate.substring(5, 7)),
-                                          int.parse(
-                                              bc.expiryDate.substring(8, 10))),
+                                              s.goalDate.substring(8, 10))),
                                       [d, ' ', M, ' ', yyyy]).toString(),
                                   style: GoogleFonts.inter(
                                       fontSize: 13,
@@ -176,7 +172,7 @@ class _CardOrganiserState extends State<CardOrganiser> {
                           children: <Widget>[
                             Text(
                                 "£" +
-                                    FlutterMoneyFormatter(amount: bc.amount)
+                                    FlutterMoneyFormatter(amount: s.totalAmount)
                                         .output
                                         .nonSymbol,
                                 style: GoogleFonts.inter(

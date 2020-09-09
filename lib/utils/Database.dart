@@ -40,7 +40,7 @@ class DBProvider {
           category INTEGER,
           amount FLOAT,
           reoccur BIT,
-          bankcard Integer,
+          bankcard INTEGER,
           FOREIGN KEY (bankcard) REFERENCES bankcards (id),
           FOREIGN KEY (category) REFERENCES incats (id)
         )
@@ -49,6 +49,7 @@ class DBProvider {
       await db.execute('''
         CREATE TABLE bankcards (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
+          cardorder INTEGER,
           cardnumber INTEGER,
           cardname TEXT,
           expirydate TEXT,
@@ -60,7 +61,7 @@ class DBProvider {
         CREATE TABLE extrans (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT,
-          date DATE,
+          date DATE, 
           category INTEGER,
           amount FLOAT,
           reoccur BIT,
@@ -72,6 +73,7 @@ class DBProvider {
       await db.execute('''
         CREATE TABLE savings (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
+          savingorder INTEGER,
           savingsitem TEXT,
           amountsaved FLOAT,
           totalamount FLOAT,
@@ -127,10 +129,11 @@ class DBProvider {
     final db = await database;
     var res = await db.rawInsert('''
       INSERT INTO bankcards (
-        cardnumber, cardname, expirydate, amount, cardtype
-      ) VALUES (?, ?, ?, ?, ?)
+        cardnumber, cardorder, cardname, expirydate, amount, cardtype
+      ) VALUES (?, ?, ?, ?, ?, ?)
     ''', [
       bankCard.cardNumber,
+      bankCard.cardOrder,
       bankCard.cardName,
       bankCard.expiryDate,
       bankCard.amount,
@@ -142,7 +145,9 @@ class DBProvider {
 
   Future<List<BankCard>> getBankCards() async {
     final db = await database;
-    var res = await db.query("bankcards");
+    var res = await db.rawQuery('''
+      SELECT * FROM bankcards ORDER BY cardorder
+    ''');
     List<BankCard> bankcardslist =
         res.isNotEmpty ? res.map((e) => BankCard.fromMap(e)).toList() : [];
     return bankcardslist;
@@ -161,6 +166,24 @@ class DBProvider {
     var res = await db.update("bankcards", bankCard.toMap(),
         where: "id = ?", whereArgs: [id]);
     return res;
+  }
+
+  updateBankCardOrder(cardorder, id) async {
+    final db = await database;
+    var res = await db.rawUpdate('''
+      UPDATE bankcards SET cardorder = ? WHERE id = ?
+    ''', [cardorder, id]);
+    return res;
+  }
+
+  deleteBankCardById(id) async {
+    final db = await database;
+    db.delete("intrans", where: "bankcard = ?", whereArgs: [id]);
+    db.delete("extrans", where: "bankcard = ?", whereArgs: [id]);
+    db.delete("savingstransactions",
+        where: "paymentaccount = ?", whereArgs: [id]);
+
+    db.delete("bankcards", where: "id = ?", whereArgs: [id]);
   }
 
   //Income
@@ -450,9 +473,10 @@ class DBProvider {
     final db = await database;
     var res = await db.rawInsert('''
       INSERT INTO savings (
-        savingsitem, amountsaved, totalamount, goaldate
-      ) VALUES (?, ?, ?, ?)
+        savingorder, savingsitem, amountsaved, totalamount, goaldate
+      ) VALUES (?, ?, ?, ?, ?)
     ''', [
+      saving.savingOrder,
       saving.savingsItem,
       saving.amountSaved,
       saving.totalAmount,
@@ -464,7 +488,9 @@ class DBProvider {
 
   Future<List<Saving>> getSavings() async {
     final db = await database;
-    var res = await db.query("savings");
+    var res = await db.rawQuery('''
+      SELECT * FROM savings ORDER BY savingorder
+    ''');
     List<Saving> savingslist =
         res.isNotEmpty ? res.map((e) => Saving.fromMap(e)).toList() : [];
     return savingslist;
@@ -476,6 +502,21 @@ class DBProvider {
     SELECT * FROM savings WHERE id = ?
     ''', [id]);
     return res.isNotEmpty ? Saving.fromMap(res.first) : Null;
+  }
+
+  updateSavingOrder(savingorder, id) async {
+    final db = await database;
+    var res = await db.rawUpdate('''
+      UPDATE savings SET savingorder = ? WHERE id = ?
+    ''', [savingorder, id]);
+    return res;
+  }
+
+  updateSaving(id, saving) async {
+    final db = await database;
+    var res = await db
+        .update("savings", saving.toMap(), where: "id = ?", whereArgs: [id]);
+    return res;
   }
 
   deleteSavingGoal(int id) async {
@@ -644,7 +685,6 @@ class DBProvider {
   }
 
   //Utils
-
   bool leapYear(year) {
     bool leap = false;
 

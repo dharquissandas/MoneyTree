@@ -1,25 +1,60 @@
 import 'package:currency_textfield/currency_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:money_tree/models/SavingsModel.dart';
+import 'package:money_tree/screens/SavingsOrganiser.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:page_transition/page_transition.dart';
 
 import 'HomeLayout.dart';
 
 class AddSavingGoal extends StatefulWidget {
+  final Saving s;
+  AddSavingGoal({Key key, @required this.s}) : super(key: key);
   @override
   _AddSavingGoalState createState() => _AddSavingGoalState();
 }
 
 class _AddSavingGoalState extends State<AddSavingGoal> {
   int id;
+  int savingorder = 0;
   String savingsitem;
   double amountSaved = 0.00;
   double totalAmount;
   String goalDate;
 
+  @override
+  void initState() {
+    if (widget.s != null) {
+      print(widget.s.id);
+      id = widget.s.id;
+      savingorder = widget.s.savingOrder;
+
+      amountSaved = widget.s.amountSaved;
+
+      savingsitem = widget.s.savingsItem;
+      itemcontroller.text = widget.s.savingsItem;
+
+      totalAmount = widget.s.totalAmount;
+      totalAmountController.text = widget.s.totalAmount.toString();
+
+      goalDate = widget.s.goalDate;
+      _date.text = widget.s.goalDate;
+    } else {
+      DBProvider.db.getSavings().then((value) {
+        if (value.length > 1) {
+          setState(() {
+            savingorder = value.last.savingOrder + 1;
+          });
+        }
+      });
+    }
+
+    super.initState();
+  }
+
   final GlobalKey<FormState> formkey = GlobalKey<FormState>();
   TextEditingController _date = new TextEditingController();
+  TextEditingController itemcontroller = new TextEditingController();
 
   var totalAmountController = CurrencyTextFieldController(
       rightSymbol: "£", decimalSymbol: ".", thousandSymbol: ",");
@@ -27,6 +62,7 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
   Widget buildSavingsItem() {
     return TextFormField(
       autocorrect: true,
+      controller: itemcontroller,
       decoration: InputDecoration(labelText: "Saving Goal"),
       textCapitalization: TextCapitalization.sentences,
       validator: (value) {
@@ -102,6 +138,57 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
           style: TextStyle(color: Colors.black),
         ),
       ),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: 12),
+        child: FloatingActionButton.extended(
+            icon: Icon(Icons.check),
+            backgroundColor: Colors.teal[300],
+            elevation: 20,
+            label: Text("Confirm"),
+            onPressed: () {
+              if (!formkey.currentState.validate()) {
+                return;
+              }
+              formkey.currentState.save();
+
+              if (widget.s != null) {
+                print("updating");
+                Saving saving = Saving(
+                    id: id,
+                    savingOrder: savingorder,
+                    savingsItem: savingsitem,
+                    amountSaved: amountSaved,
+                    totalAmount: totalAmount,
+                    goalDate: goalDate);
+
+                print(saving.id);
+
+                DBProvider.db.updateSaving(id, saving);
+
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    PageTransition(
+                        type: PageTransitionType.leftToRight,
+                        child: SavingsOrganiser()),
+                    (route) => false);
+              } else {
+                Saving saving = Saving(
+                    savingOrder: savingorder,
+                    savingsItem: savingsitem,
+                    amountSaved: amountSaved,
+                    totalAmount: totalAmount,
+                    goalDate: goalDate);
+
+                DBProvider.db.newSaving(saving);
+
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    PageTransition(
+                        type: PageTransitionType.leftToRight, child: Home()),
+                    (route) => false);
+              }
+            }),
+      ),
       body: Container(
         margin: EdgeInsets.only(top: 8),
         child: ListView(
@@ -116,36 +203,6 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
                     buildSavingsItem(),
                     buildTotalAmount(),
                     buildGoalDate(),
-                    SizedBox(
-                      height: 100,
-                    ),
-                    RaisedButton(
-                      onPressed: () {
-                        if (!formkey.currentState.validate()) {
-                          return;
-                        }
-                        formkey.currentState.save();
-
-                        Saving saving = Saving(
-                            savingsItem: savingsitem,
-                            amountSaved: amountSaved,
-                            totalAmount: totalAmount,
-                            goalDate: goalDate);
-
-                        DBProvider.db.newSaving(saving);
-
-                        Navigator.push(
-                            context,
-                            PageTransition(
-                                type: PageTransitionType.fade,
-                                duration: Duration(microseconds: 4),
-                                child: Home()));
-                      },
-                      child: Text(
-                        'Add Saving Goal',
-                        style: TextStyle(color: Colors.blue, fontSize: 16),
-                      ),
-                    )
                   ],
                 ),
               ),

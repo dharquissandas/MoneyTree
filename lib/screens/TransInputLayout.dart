@@ -2,6 +2,7 @@ import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:money_tree/models/ExpenseTransactionModel.dart';
 import 'package:money_tree/models/IncomeTransactionModel.dart';
+import 'package:money_tree/models/SavingsModel.dart';
 import 'package:money_tree/models/SavingsTransactionModel.dart';
 import 'package:money_tree/screens/add_expense.dart';
 import 'package:money_tree/screens/add_income.dart';
@@ -14,7 +15,12 @@ import 'HomeLayout.dart';
 class TransInput extends StatefulWidget {
   final int page;
   final dynamic transaction;
-  TransInput({Key key, @required this.page, @required this.transaction})
+  final Saving saving;
+  TransInput(
+      {Key key,
+      @required this.page,
+      @required this.transaction,
+      @required this.saving})
       : super(key: key);
   @override
   _TransInputState createState() => _TransInputState();
@@ -50,7 +56,12 @@ class _TransInputState extends State<TransInput> {
     } else if (pageIndex == 1) {
       return AddExpense(transaction: widget.transaction);
     } else {
-      return AddSaving();
+      if (widget.saving != null) {
+        return AddSaving(
+            transaction: widget.transaction, saving: widget.saving);
+      } else {
+        return AddSaving(transaction: widget.transaction, saving: null);
+      }
     }
   }
 
@@ -130,17 +141,34 @@ class _TransInputState extends State<TransInput> {
             }
             savingpaymentkey.currentState.save();
 
-            var newSavingTransaction = SavingTransaction(
-                paymentaccount: paymentaccount,
-                paymentamount: paymentamount,
-                saving: saving,
-                paymentdate: paymentdate,
-                savingreoccur: boolcheck(savingreoccur));
+            if (savingid == -1) {
+              print("here");
+              var newSavingTransaction = SavingTransaction(
+                  paymentaccount: paymentaccount,
+                  paymentamount: paymentamount,
+                  saving: saving,
+                  paymentdate: paymentdate,
+                  savingreoccur: boolcheck(savingreoccur));
 
-            DBProvider.db.newSavingTransaction(newSavingTransaction);
+              DBProvider.db.newSavingTransaction(newSavingTransaction);
+            } else {
+              print("There");
+              var updatedSavingTransaction = SavingTransaction(
+                  id: savingid,
+                  paymentaccount: paymentaccount,
+                  paymentamount: paymentamount,
+                  saving: saving,
+                  paymentdate: paymentdate,
+                  savingreoccur: boolcheck(savingreoccur));
+
+              DBProvider.db
+                  .updateSavingTransaction(savingid, updatedSavingTransaction);
+            }
+
             savingpaymentkey.currentState.reset();
             saving = null;
             paymentaccount = null;
+            savingid = -1;
           }
           Navigator.pushAndRemoveUntil(
               context,

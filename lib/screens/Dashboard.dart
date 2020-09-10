@@ -499,6 +499,7 @@ class _DashboardState extends State<Dashboard> {
                                       child: TransInput(
                                         page: 0,
                                         transaction: it,
+                                        saving: null,
                                       )));
                             },
                             child: Ink(
@@ -646,6 +647,7 @@ class _DashboardState extends State<Dashboard> {
                                       child: TransInput(
                                         page: 1,
                                         transaction: et,
+                                        saving: null,
                                       )));
                             },
                             child: Ink(

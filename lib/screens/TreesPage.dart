@@ -4,7 +4,7 @@ import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:money_tree/components/radialpainter.dart';
 import 'package:money_tree/models/SavingsModel.dart';
-import 'package:money_tree/screens/SavingInfo.dart';
+import 'package:money_tree/screens/SavingsLayout.dart';
 import 'package:money_tree/screens/add_saving_goal.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:page_transition/page_transition.dart';
@@ -18,26 +18,6 @@ class _TreePageState extends State<TreePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   backgroundColor: Colors.white,
-      //   actions: [
-      //     IconButton(
-      //         icon: Icon(Icons.add),
-      //         color: Colors.black,
-      //         onPressed: () {
-      //           Navigator.push(
-      //               context,
-      //               PageTransition(
-      //                   type: PageTransitionType.rightToLeft,
-      //                   child: AddSavingGoal()));
-      //         })
-      //   ],
-      //   title: Text(
-      //     "Money Trees",
-      //     style: TextStyle(color: Colors.black),
-      //   ),
-      //   centerTitle: true,
-      // ),
       body: Container(
         child: ListView(
           physics: BouncingScrollPhysics(),
@@ -88,33 +68,25 @@ class _TreePageState extends State<TreePage> {
                         itemCount: snapshot.data.length,
                         itemBuilder: (context, index) {
                           Saving s = snapshot.data[index];
+                          print(s.id);
+                          print(s.amountSaved);
                           return Container(
                             margin:
                                 EdgeInsets.only(right: 10, bottom: 8, top: 8),
                             child: InkWell(
                               onTap: () {
-                                var points = <FlSpot>[];
                                 DBProvider.db
                                     .getSavingsTransForSaving(s.id)
                                     .then((value) {
-                                  var total = 0.0;
-                                  for (var i = 0; i < value.length; i++) {
-                                    total = total +
-                                        (value[i].paymentamount /
-                                                s.totalAmount) *
-                                            10;
-                                    points.add(FlSpot(i.toDouble(), (total)));
-                                  }
-
                                   if (value.length > 0) {
                                     Navigator.push(
                                         context,
                                         PageTransition(
                                             type:
                                                 PageTransitionType.rightToLeft,
-                                            child: SavingInfo(
-                                                saving: snapshot.data[index],
-                                                points: points)));
+                                            child: SavingsLayout(
+                                              saving: snapshot.data[index],
+                                            )));
                                   } else {
                                     final snackbar = SnackBar(
                                         duration: Duration(seconds: 1),

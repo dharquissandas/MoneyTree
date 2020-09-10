@@ -634,6 +634,50 @@ class DBProvider {
     return amount;
   }
 
+  updateSavingTransaction(int id, SavingTransaction st) async {
+    final db = await database;
+    var res;
+
+    getSavingTransById(id).then((oldst) async {
+      res = await db.update("savingstransactions", st.toMap(),
+          where: "id = ?", whereArgs: [id]);
+
+      var card = await db
+          .query("bankcards", where: "id = ?", whereArgs: [st.paymentaccount]);
+      BankCard cardfirst =
+          card.isNotEmpty ? BankCard.fromMap(card.first) : Null;
+
+      BankCard updatedcard = BankCard(
+        id: st.paymentaccount,
+        cardNumber: cardfirst.cardNumber,
+        cardName: cardfirst.cardName,
+        expiryDate: cardfirst.expiryDate,
+        amount: (cardfirst.amount - oldst.paymentamount) + st.paymentamount,
+        cardType: cardfirst.cardType,
+      );
+
+      res = await db.update("bankcards", updatedcard.toMap(),
+          where: "id = ?", whereArgs: [st.paymentaccount]);
+
+      getSavingById(st.saving).then((value) {
+        Saving updatedSaving = Saving(
+            id: st.saving,
+            savingOrder: value.savingOrder,
+            savingsItem: value.savingsItem,
+            amountSaved:
+                (value.amountSaved - oldst.paymentamount) + st.paymentamount,
+            totalAmount: value.totalAmount,
+            goalDate: value.goalDate);
+
+        print(updatedSaving.amountSaved);
+
+        updateSaving(id, updatedSaving);
+      });
+    });
+
+    return res;
+  }
+
   deleteSavingTrans(SavingTransaction st) async {
     final db = await database;
 
@@ -648,6 +692,18 @@ class DBProvider {
       );
 
       updateBankCard(bc.id, updatedcard);
+    });
+
+    getSavingById(st.saving).then((s) async {
+      Saving updatedSaving = Saving(
+          id: s.id,
+          savingOrder: s.savingOrder,
+          savingsItem: s.savingsItem,
+          amountSaved: s.amountSaved - st.paymentamount,
+          totalAmount: s.totalAmount,
+          goalDate: s.goalDate);
+
+      updateSaving(s.id, updatedSaving);
     });
 
     db.delete("savingstransactions", where: "id = ?", whereArgs: [st.id]);

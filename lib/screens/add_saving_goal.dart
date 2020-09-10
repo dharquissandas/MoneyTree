@@ -152,7 +152,6 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
               formkey.currentState.save();
 
               if (widget.s != null) {
-                print("updating");
                 Saving saving = Saving(
                     id: id,
                     savingOrder: savingorder,
@@ -160,8 +159,6 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
                     amountSaved: amountSaved,
                     totalAmount: totalAmount,
                     goalDate: goalDate);
-
-                print(saving.id);
 
                 DBProvider.db.updateSaving(id, saving);
 

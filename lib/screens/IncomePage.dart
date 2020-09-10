@@ -54,6 +54,7 @@ class _IncomePageState extends State<IncomePage> {
                                   child: TransInput(
                                     page: 0,
                                     transaction: it,
+                                    saving: null,
                                   )));
                         },
                         child: Ink(

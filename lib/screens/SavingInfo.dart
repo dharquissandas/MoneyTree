@@ -10,9 +10,7 @@ import 'package:fl_chart/fl_chart.dart';
 
 class SavingInfo extends StatefulWidget {
   final Saving saving;
-  final dynamic points;
-  SavingInfo({Key key, @required this.saving, @required this.points})
-      : super(key: key);
+  SavingInfo({Key key, @required this.saving}) : super(key: key);
   @override
   _SavingInfoState createState() => _SavingInfoState();
 }
@@ -20,7 +18,6 @@ class SavingInfo extends StatefulWidget {
 class _SavingInfoState extends State<SavingInfo> {
   List<SavingTransaction> tlist = List<SavingTransaction>();
   var largestpaidamount;
-  var points = <FlSpot>[FlSpot(0, 0)];
 
   List<Color> gradientColors = [
     const Color(0xff23b6e6),
@@ -29,6 +26,7 @@ class _SavingInfoState extends State<SavingInfo> {
 
   @override
   void initState() {
+    setState(() {});
     var la;
 
     DBProvider.db.getSavingsTransForSaving(widget.saving.id).then((value) {
@@ -50,17 +48,6 @@ class _SavingInfoState extends State<SavingInfo> {
     super.initState();
   }
 
-  createpoints() {
-    var points = <FlSpot>[FlSpot(0, 0)];
-    var total = 0.0;
-    for (var i = 0; i < tlist.length; i++) {
-      total = total + (tlist[i].paymentamount / widget.saving.totalAmount) * 10;
-      points.add(FlSpot(i.toDouble(), (total)));
-    }
-    points.removeAt(0);
-    return points;
-  }
-
   createBar() {
     var points = <BarChartGroupData>[];
     for (var i = 0; i < tlist.length; i++) {
@@ -79,212 +66,237 @@ class _SavingInfoState extends State<SavingInfo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        iconTheme: IconThemeData(
-          color: Colors.black,
-        ),
-        backgroundColor: Colors.white,
-        centerTitle: true,
-        title: Text(
-          "Savings Analysis",
-          style: TextStyle(color: Colors.black),
-        ),
-      ),
       body: ListView(
+        physics: BouncingScrollPhysics(),
         children: <Widget>[
-          Container(
-            margin: EdgeInsets.only(bottom: 16, top: 16, right: 16, left: 16),
-            height: 260,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 5,
-                  spreadRadius: 1,
-                  offset: Offset(0, 2.0),
-                )
-              ],
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.white,
-            ),
-            child: Stack(
-              children: <Widget>[
-                //Item Name
-                Positioned(
-                  left: 20,
-                  top: 16,
-                  child: Text(
-                    widget.saving.savingsItem,
-                    style: GoogleFonts.inter(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
+          FutureBuilder<Saving>(
+            future: DBProvider.db.getSavingById(widget.saving.id),
+            builder: (BuildContext context, AsyncSnapshot<Saving> snapshot) {
+              if (snapshot.hasData) {
+                Saving s = snapshot.data;
+                return Container(
+                  margin:
+                      EdgeInsets.only(bottom: 16, top: 16, right: 16, left: 16),
+                  height: 260,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 5,
+                        spreadRadius: 1,
+                        offset: Offset(0, 2.0),
+                      )
+                    ],
+                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.white,
                   ),
-                ),
-
-                Positioned(
-                  right: 20,
-                  top: 130,
-                  child: Text(
-                    "AMOUNT SAVED:",
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-
-                Positioned(
-                  right: 20,
-                  top: 150,
-                  child: Text(
-                    "£" +
-                        FlutterMoneyFormatter(amount: widget.saving.amountSaved)
-                            .output
-                            .nonSymbol,
-                    style: GoogleFonts.inter(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-
-                Positioned(
-                  right: 20,
-                  top: 70,
-                  child: Text(
-                    "TOTAL AMOUNT:",
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-
-                Positioned(
-                  right: 20,
-                  top: 90,
-                  child: Text(
-                    "£" +
-                        FlutterMoneyFormatter(amount: widget.saving.totalAmount)
-                            .output
-                            .nonSymbol,
-                    style: GoogleFonts.inter(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-
-                Positioned(
-                  right: 20,
-                  top: 190,
-                  child: Text(
-                    "AMOUNT NEEDED:",
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-
-                Positioned(
-                  right: 16,
-                  top: 210,
-                  child: Text(
-                    "£" +
-                        FlutterMoneyFormatter(
-                                amount: widget.saving.totalAmount -
-                                    widget.saving.amountSaved)
-                            .output
-                            .nonSymbol,
-                    style: GoogleFonts.inter(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-
-                //Tree Circular
-                Positioned(
-                  top: 80,
-                  left: 16,
-                  child: Container(
-                    height: 150,
-                    width: 160,
-                    child: CustomPaint(
-                      foregroundPainter: RadialPainter(
-                          bgColor: Colors.grey[200],
-                          lineColor: Colors.green,
-                          percent: widget.saving.amountSaved /
-                              widget.saving.totalAmount,
-                          width: 10),
-                      child: Center(
+                  child: Stack(
+                    children: <Widget>[
+                      //Item Name
+                      Positioned(
+                        left: 20,
+                        top: 16,
                         child: Text(
-                          "Tree",
-                          style: TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.bold,
+                          s.savingsItem,
+                          style: GoogleFonts.inter(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(bottom: 16, right: 16, left: 16),
-            decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 5,
-                    spreadRadius: 1,
-                    offset: Offset(0, 2.0),
-                  )
-                ],
-                borderRadius: BorderRadius.all(
-                  Radius.circular(20),
-                ),
-                color: Colors.white),
-            child: Padding(
-              padding: const EdgeInsets.only(
-                  right: 30, left: 16, top: 16, bottom: 12),
-              child: Column(
-                children: [
-                  Text(
-                    "Savings Accumulation",
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 37,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: LineChart(
-                          mainData(),
+
+                      Positioned(
+                        right: 20,
+                        top: 130,
+                        child: Text(
+                          "AMOUNT SAVED:",
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        right: 20,
+                        top: 150,
+                        child: Text(
+                          "£" +
+                              FlutterMoneyFormatter(amount: s.amountSaved)
+                                  .output
+                                  .nonSymbol,
+                          style: GoogleFonts.inter(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        right: 20,
+                        top: 70,
+                        child: Text(
+                          "TOTAL AMOUNT:",
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        right: 20,
+                        top: 90,
+                        child: Text(
+                          "£" +
+                              FlutterMoneyFormatter(amount: s.totalAmount)
+                                  .output
+                                  .nonSymbol,
+                          style: GoogleFonts.inter(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        right: 20,
+                        top: 190,
+                        child: Text(
+                          "AMOUNT NEEDED:",
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+
+                      Positioned(
+                        right: 16,
+                        top: 210,
+                        child: Text(
+                          "£" +
+                              FlutterMoneyFormatter(
+                                      amount: s.totalAmount - s.amountSaved)
+                                  .output
+                                  .nonSymbol,
+                          style: GoogleFonts.inter(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+
+                      //Tree Circular
+                      Positioned(
+                        top: 80,
+                        left: 16,
+                        child: Container(
+                          height: 150,
+                          width: 160,
+                          child: CustomPaint(
+                            foregroundPainter: RadialPainter(
+                                bgColor: Colors.grey[200],
+                                lineColor: Colors.green,
+                                percent: s.amountSaved / s.totalAmount,
+                                width: 10),
+                            child: Center(
+                              child: Text(
+                                "Tree",
+                                style: TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
+                );
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
+          FutureBuilder<List<SavingTransaction>>(
+            future: DBProvider.db.getSavingsTransForSaving(widget.saving.id),
+            builder: (BuildContext context,
+                AsyncSnapshot<List<SavingTransaction>> snapshot) {
+              if (snapshot.hasData) {
+                if (snapshot.data.length <= 1) {
+                  return Container();
+                } else {
+                  var points = <FlSpot>[];
+                  var total = 0.0;
+                  for (var i = 0; i < snapshot.data.length; i++) {
+                    total = total +
+                        (snapshot.data[i].paymentamount /
+                                widget.saving.totalAmount) *
+                            10;
+                    points.add(FlSpot(i.toDouble(), (total)));
+                  }
+
+                  return Container(
+                    margin: EdgeInsets.only(bottom: 16, right: 16, left: 16),
+                    decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 5,
+                            spreadRadius: 1,
+                            offset: Offset(0, 2.0),
+                          )
+                        ],
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(20),
+                        ),
+                        color: Colors.white),
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          right: 30, left: 16, top: 16, bottom: 12),
+                      child: Column(
+                        children: [
+                          Text(
+                            "Savings Accumulation",
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black,
+                            ),
+                          ),
+                          SizedBox(
+                            height: 37,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: LineChart(
+                                  mainData(points),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+              } else {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+            },
           ),
           Container(
             margin: EdgeInsets.only(bottom: 16, right: 16, left: 16),
@@ -331,7 +343,7 @@ class _SavingInfoState extends State<SavingInfo> {
     );
   }
 
-  LineChartData mainData() {
+  LineChartData mainData(points) {
     return LineChartData(
         lineTouchData: LineTouchData(enabled: false),
         gridData: FlGridData(
@@ -411,7 +423,7 @@ class _SavingInfoState extends State<SavingInfo> {
         maxY: 10,
         lineBarsData: [
           LineChartBarData(
-            spots: widget.points,
+            spots: points,
             isCurved: true,
             colors: gradientColors,
             barWidth: 2,
@@ -447,7 +459,8 @@ class _SavingInfoState extends State<SavingInfo> {
                 int rodIndex,
               ) {
                 return BarTooltipItem(
-                  rod.y.round().toString(),
+                  "£" + FlutterMoneyFormatter(amount: rod.y).output.nonSymbol,
+                  //rod.y.round().toString(),
                   TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,

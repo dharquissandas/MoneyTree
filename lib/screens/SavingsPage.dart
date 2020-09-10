@@ -2,38 +2,32 @@ import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:money_tree/models/ExpenseTransactionModel.dart';
+import 'package:money_tree/models/SavingsTransactionModel.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:page_transition/page_transition.dart';
 
 import 'TransInputLayout.dart';
 
-class ExpensePage extends StatefulWidget {
+class SavingsPage extends StatefulWidget {
+  final int saving;
+  SavingsPage({Key key, @required this.saving}) : super(key: key);
   @override
-  _ExpensePageState createState() => _ExpensePageState();
+  _SavingsPageState createState() => _SavingsPageState();
 }
 
-class _ExpensePageState extends State<ExpensePage> {
+class _SavingsPageState extends State<SavingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   backgroundColor: Colors.white,
-      //   title: Text(
-      //     "Expense Transactions",
-      //     style: TextStyle(color: Colors.black),
-      //   ),
-      //   centerTitle: true,
-      // ),
       body: Container(
         margin: EdgeInsets.only(top: 16),
-        child: FutureBuilder<List<ExpenseTransaction>>(
-          future: DBProvider.db.getExpenseTransaction(),
+        child: FutureBuilder<List<SavingTransaction>>(
+          future: DBProvider.db.getSavingsTransForSaving(widget.saving),
           builder: (BuildContext context,
-              AsyncSnapshot<List<ExpenseTransaction>> snapshot) {
+              AsyncSnapshot<List<SavingTransaction>> snapshot) {
             if (snapshot.hasData) {
               if (snapshot.data.length == 0) {
-                return Center(child: Text("No Expense Transactions"));
+                return Center(child: Text("No Saving Transactions"));
               } else {
                 return ListView.builder(
                   itemCount: snapshot.data.length,
@@ -41,19 +35,19 @@ class _ExpensePageState extends State<ExpensePage> {
                   shrinkWrap: true,
                   physics: BouncingScrollPhysics(),
                   itemBuilder: (BuildContext context, int index) {
-                    ExpenseTransaction et = snapshot.data[index];
+                    SavingTransaction st = snapshot.data[index];
                     return Container(
                       margin: EdgeInsets.only(bottom: 13),
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(13),
+                        borderRadius: BorderRadius.circular(15),
                         onTap: () {
                           Navigator.push(
                               context,
                               PageTransition(
                                   type: PageTransitionType.rightToLeft,
                                   child: TransInput(
-                                    page: 1,
-                                    transaction: et,
+                                    page: 2,
+                                    transaction: st,
                                     saving: null,
                                   )));
                         },
@@ -84,22 +78,22 @@ class _ExpensePageState extends State<ExpensePage> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
                                       Text(
-                                        et.name,
+                                        formatDate(
+                                            DateTime(
+                                                int.parse(st.paymentdate
+                                                    .substring(0, 4)),
+                                                int.parse(st.paymentdate
+                                                    .substring(5, 7)),
+                                                int.parse(st.paymentdate
+                                                    .substring(8, 10))),
+                                            [d, ' ', M, ' ', yyyy]).toString(),
                                         style: GoogleFonts.inter(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w700,
                                             color: Colors.black),
                                       ),
                                       Text(
-                                        formatDate(
-                                            DateTime(
-                                                int.parse(
-                                                    et.date.substring(0, 4)),
-                                                int.parse(
-                                                    et.date.substring(5, 7)),
-                                                int.parse(
-                                                    et.date.substring(8, 10))),
-                                            [d, ' ', M, ' ', yyyy]).toString(),
+                                        "Saving",
                                         style: GoogleFonts.inter(
                                             fontSize: 13,
                                             fontWeight: FontWeight.w700,
@@ -113,7 +107,8 @@ class _ExpensePageState extends State<ExpensePage> {
                                 children: <Widget>[
                                   Text(
                                     "£" +
-                                        FlutterMoneyFormatter(amount: et.amount)
+                                        FlutterMoneyFormatter(
+                                                amount: st.paymentamount)
                                             .output
                                             .nonSymbol,
                                     style: GoogleFonts.inter(
@@ -123,8 +118,7 @@ class _ExpensePageState extends State<ExpensePage> {
                                   ),
                                   InkWell(
                                     onTap: () {
-                                      DBProvider.db
-                                          .deleteExpenseTransaction(et);
+                                      DBProvider.db.deleteSavingTrans(st);
                                       setState(() {});
                                     },
                                     child: Container(
@@ -137,7 +131,7 @@ class _ExpensePageState extends State<ExpensePage> {
                                             color: Colors.red),
                                       ),
                                     ),
-                                  )
+                                  ),
                                 ],
                               ),
                             ],

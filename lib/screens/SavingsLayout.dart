@@ -1,26 +1,25 @@
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:money_tree/screens/CardOrganiser.dart';
-import 'package:money_tree/screens/Dashboard.dart';
+import 'package:money_tree/models/SavingsModel.dart';
+import 'package:money_tree/screens/SavingInfo.dart';
+import 'package:money_tree/screens/SavingsPage.dart';
 import 'package:money_tree/screens/TransInputLayout.dart';
-import 'package:money_tree/screens/TreesPage.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:money_tree/screens/ExpensePage.dart';
-import 'package:money_tree/screens/IncomePage.dart';
-import 'SavingsOrganiser.dart';
 
-class Home extends StatefulWidget {
+class SavingsLayout extends StatefulWidget {
+  final Saving saving;
+  SavingsLayout({Key key, @required this.saving}) : super(key: key);
   @override
-  _HomeState createState() => _HomeState();
+  _SavingsLayoutState createState() => _SavingsLayoutState();
 }
 
-class _HomeState extends State<Home> {
+class _SavingsLayoutState extends State<SavingsLayout> {
   int pageIndex;
-
   @override
   void initState() {
-    super.initState();
     pageIndex = 0;
+
+    super.initState();
   }
 
   changePage(int index) {
@@ -31,60 +30,23 @@ class _HomeState extends State<Home> {
 
   pageSetter() {
     if (pageIndex == 0) {
-      return Dashboard();
+      return SavingInfo(saving: widget.saving);
     } else if (pageIndex == 1) {
-      return TreePage();
+      return;
     } else if (pageIndex == 2) {
-      return IncomePage();
-    } else {
-      return ExpensePage();
+      return SavingsPage(saving: widget.saving.id);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: Drawer(
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              child: Text('Deep Harquissandas'),
-              decoration: BoxDecoration(
-                color: Colors.teal[300],
-              ),
-            ),
-            ListTile(
-                title: Text('Cards Organiser'),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                      context,
-                      PageTransition(
-                          type: PageTransitionType.rightToLeft,
-                          child: CardOrganiser()));
-                }),
-            ListTile(
-              title: Text('Saving Tree Organiser'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    PageTransition(
-                        type: PageTransitionType.rightToLeft,
-                        child: SavingsOrganiser()));
-              },
-            ),
-          ],
-        ),
-      ),
       appBar: AppBar(
           backgroundColor: Colors.white,
           centerTitle: true,
           iconTheme: IconThemeData(color: Colors.black),
           title: Text(
-            "Money Tree",
+            "Savings Analysis",
             style: TextStyle(color: Colors.black),
           )),
       backgroundColor: Colors.grey[100],
@@ -95,9 +57,9 @@ class _HomeState extends State<Home> {
               PageTransition(
                   type: PageTransitionType.downToUp,
                   child: TransInput(
-                    page: 0,
+                    page: 2,
                     transaction: null,
-                    saving: null,
+                    saving: widget.saving,
                   )));
         },
         child: Icon(Icons.add),
@@ -130,14 +92,14 @@ class _HomeState extends State<Home> {
           BubbleBottomBarItem(
             backgroundColor: Colors.teal[300],
             icon: Icon(
-              Icons.filter_vintage,
+              Icons.assessment,
               color: Colors.black,
             ),
             activeIcon: Icon(
-              Icons.filter_vintage,
+              Icons.assessment,
               color: Colors.teal[300],
             ),
-            title: Text("Tree"),
+            title: Text("Planner"),
           ),
           BubbleBottomBarItem(
             backgroundColor: Colors.green,
@@ -149,19 +111,7 @@ class _HomeState extends State<Home> {
               Icons.trending_up,
               color: Colors.green,
             ),
-            title: Text("Income"),
-          ),
-          BubbleBottomBarItem(
-            backgroundColor: Colors.red,
-            icon: Icon(
-              Icons.trending_down,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.trending_down,
-              color: Colors.red,
-            ),
-            title: Text("Expense"),
+            title: Text("Transactions"),
           ),
         ],
       ),

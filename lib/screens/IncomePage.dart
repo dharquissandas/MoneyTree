@@ -20,7 +20,7 @@ class _IncomePageState extends State<IncomePage> {
       // appBar: AppBar(
       //   backgroundColor: Colors.white,
       //   title: Text(
-      //     "Income Transactions",
+      //     "Expense Transactions",
       //     style: TextStyle(color: Colors.black),
       //   ),
       //   centerTitle: true,
@@ -33,7 +33,7 @@ class _IncomePageState extends State<IncomePage> {
               AsyncSnapshot<List<IncomeTransaction>> snapshot) {
             if (snapshot.hasData) {
               if (snapshot.data.length == 0) {
-                return Center(child: Text("No Income Transactions"));
+                return Center(child: Text("No Expense Transactions"));
               } else {
                 return ListView.builder(
                   itemCount: snapshot.data.length,
@@ -45,7 +45,7 @@ class _IncomePageState extends State<IncomePage> {
                     return Container(
                       margin: EdgeInsets.only(bottom: 13),
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(13),
                         onTap: () {
                           Navigator.push(
                               context,
@@ -136,7 +136,7 @@ class _IncomePageState extends State<IncomePage> {
                                             color: Colors.red),
                                       ),
                                     ),
-                                  ),
+                                  )
                                 ],
                               ),
                             ],

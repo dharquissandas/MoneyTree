@@ -142,7 +142,6 @@ class _TransInputState extends State<TransInput> {
             savingpaymentkey.currentState.save();
 
             if (savingid == -1) {
-              print("here");
               var newSavingTransaction = SavingTransaction(
                   paymentaccount: paymentaccount,
                   paymentamount: paymentamount,
@@ -152,7 +151,6 @@ class _TransInputState extends State<TransInput> {
 
               DBProvider.db.newSavingTransaction(newSavingTransaction);
             } else {
-              print("There");
               var updatedSavingTransaction = SavingTransaction(
                   id: savingid,
                   paymentaccount: paymentaccount,

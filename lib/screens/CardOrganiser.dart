@@ -22,9 +22,6 @@ class _CardOrganiserState extends State<CardOrganiser> {
       setState(() {
         bclist = value;
       });
-      for (var i = 0; i < bclist.length; i++) {
-        print(bclist[i].cardOrder);
-      }
     });
     super.initState();
   }

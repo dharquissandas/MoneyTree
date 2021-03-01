@@ -68,8 +68,6 @@ class _TreePageState extends State<TreePage> {
                         itemCount: snapshot.data.length,
                         itemBuilder: (context, index) {
                           Saving s = snapshot.data[index];
-                          print(s.id);
-                          print(s.amountSaved);
                           return Container(
                             margin:
                                 EdgeInsets.only(right: 10, bottom: 8, top: 8),

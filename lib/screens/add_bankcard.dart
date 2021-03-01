@@ -6,6 +6,7 @@ import 'package:money_tree/screens/HomeLayout.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:flutter/services.dart';
+import 'package:card_scanner/card_scanner.dart';
 
 class AddBankCard extends StatefulWidget {
   final BankCard bc;
@@ -22,6 +23,37 @@ class _AddBankCardState extends State<AddBankCard> {
   String expiryDate;
   double amount;
   String cardType;
+
+  CardDetails card;
+
+  String capitalise(String s) => s[0].toUpperCase() + s.substring(1);
+
+  Future<void> scanCard() async {
+    var cd = await CardScanner.scanCard(
+      scanOptions: CardScanOptions(
+        scanCardHolderName: true,
+        scanCardIssuer: true,
+      ),
+    );
+
+    if (!mounted) return;
+    setState(() {
+      card = cd;
+      cardNumber = int.parse(card.cardNumber.toString().substring(11, 15));
+      cardnumbercontroller.text = card.cardNumber.toString().substring(11, 15);
+
+      cardName = card.cardHolderName;
+      cardnamecontroller.text = card.cardHolderName;
+
+      expiryDate = card.expiryDate;
+      _date.text = card.expiryDate;
+
+      if (card.cardIssuer.substring(11) != "unknown") {
+        cardType = capitalise(card.cardIssuer.substring(11));
+        selectedCard = capitalise(card.cardIssuer.substring(11));
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -43,6 +75,7 @@ class _AddBankCardState extends State<AddBankCard> {
       controller.text = widget.bc.amount.toString();
 
       cardType = widget.bc.cardType;
+      selectedCard = widget.bc.cardType;
     } else {
       DBProvider.db.getBankCards().then((value) {
         if (value.length > 1) {
@@ -201,6 +234,17 @@ class _AddBankCardState extends State<AddBankCard> {
           "Add Bank Card",
           style: TextStyle(color: Colors.black),
         ),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(
+              Icons.camera_alt,
+              color: Colors.black,
+            ),
+            onPressed: () async {
+              scanCard();
+            },
+          )
+        ],
       ),
       floatingActionButton: Padding(
         padding: EdgeInsets.only(bottom: 12),

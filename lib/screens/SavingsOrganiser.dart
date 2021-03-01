@@ -151,19 +151,19 @@ class _SavingsOrganiserState extends State<SavingsOrganiser> {
                                       fontWeight: FontWeight.w700,
                                       color: Colors.black),
                                 ),
-                                Text(
-                                  formatDate(
-                                      DateTime(
-                                          int.parse(s.goalDate.substring(0, 4)),
-                                          int.parse(s.goalDate.substring(5, 7)),
-                                          int.parse(
-                                              s.goalDate.substring(8, 10))),
-                                      [d, ' ', M, ' ', yyyy]).toString(),
-                                  style: GoogleFonts.inter(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.grey),
-                                ),
+                                // Text(
+                                //   formatDate(
+                                //       DateTime(
+                                //           int.parse(s.goalDate.substring(0, 4)),
+                                //           int.parse(s.goalDate.substring(5, 7)),
+                                //           int.parse(
+                                //               s.goalDate.substring(8, 10))),
+                                //       [d, ' ', M, ' ', yyyy]).toString(),
+                                //   style: GoogleFonts.inter(
+                                //       fontSize: 13,
+                                //       fontWeight: FontWeight.w700,
+                                //       color: Colors.grey),
+                                // ),
                               ],
                             ),
                           ],

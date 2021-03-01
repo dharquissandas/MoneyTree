@@ -2,6 +2,7 @@ import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:money_tree/models/SavingsModel.dart';
 import 'package:money_tree/screens/SavingInfo.dart';
+import 'package:money_tree/screens/SavingPlanner.dart';
 import 'package:money_tree/screens/SavingsPage.dart';
 import 'package:money_tree/screens/TransInputLayout.dart';
 import 'package:page_transition/page_transition.dart';
@@ -29,12 +30,90 @@ class _SavingsLayoutState extends State<SavingsLayout> {
   }
 
   pageSetter() {
-    if (pageIndex == 0) {
-      return SavingInfo(saving: widget.saving);
-    } else if (pageIndex == 1) {
-      return;
-    } else if (pageIndex == 2) {
-      return SavingsPage(saving: widget.saving.id);
+    if (widget.saving.calculated == 1) {
+      if (pageIndex == 0) {
+        return SavingInfo(saving: widget.saving);
+      } else if (pageIndex == 1) {
+        return SavingsPlanner(saving: widget.saving);
+      } else if (pageIndex == 2) {
+        return SavingsPage(saving: widget.saving.id);
+      }
+    } else {
+      if (pageIndex == 0) {
+        return SavingInfo(saving: widget.saving);
+      } else if (pageIndex == 1) {
+        return SavingsPage(saving: widget.saving.id);
+      }
+    }
+  }
+
+  List<BubbleBottomBarItem> getNavigation() {
+    if (widget.saving.calculated == 1) {
+      return <BubbleBottomBarItem>[
+        BubbleBottomBarItem(
+          backgroundColor: Colors.teal[300],
+          icon: Icon(
+            Icons.dashboard,
+            color: Colors.black,
+          ),
+          activeIcon: Icon(
+            Icons.dashboard,
+            color: Colors.teal[300],
+          ),
+          title: Text("Dashboard"),
+        ),
+        BubbleBottomBarItem(
+          backgroundColor: Colors.teal[300],
+          icon: Icon(
+            Icons.assessment,
+            color: Colors.black,
+          ),
+          activeIcon: Icon(
+            Icons.assessment,
+            color: Colors.teal[300],
+          ),
+          title: Text("Planner"),
+        ),
+        BubbleBottomBarItem(
+          backgroundColor: Colors.green,
+          icon: Icon(
+            Icons.trending_up,
+            color: Colors.black,
+          ),
+          activeIcon: Icon(
+            Icons.trending_up,
+            color: Colors.green,
+          ),
+          title: Text("Transactions"),
+        )
+      ];
+    } else {
+      return <BubbleBottomBarItem>[
+        BubbleBottomBarItem(
+          backgroundColor: Colors.teal[300],
+          icon: Icon(
+            Icons.dashboard,
+            color: Colors.black,
+          ),
+          activeIcon: Icon(
+            Icons.dashboard,
+            color: Colors.teal[300],
+          ),
+          title: Text("Dashboard"),
+        ),
+        BubbleBottomBarItem(
+          backgroundColor: Colors.green,
+          icon: Icon(
+            Icons.trending_up,
+            color: Colors.black,
+          ),
+          activeIcon: Icon(
+            Icons.trending_up,
+            color: Colors.green,
+          ),
+          title: Text("Transactions"),
+        )
+      ];
     }
   }
 
@@ -76,44 +155,7 @@ class _SavingsLayoutState extends State<SavingsLayout> {
         hasNotch: true,
         fabLocation: BubbleBottomBarFabLocation.end,
         onTap: changePage,
-        items: <BubbleBottomBarItem>[
-          BubbleBottomBarItem(
-            backgroundColor: Colors.teal[300],
-            icon: Icon(
-              Icons.dashboard,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.dashboard,
-              color: Colors.teal[300],
-            ),
-            title: Text("Dashboard"),
-          ),
-          BubbleBottomBarItem(
-            backgroundColor: Colors.teal[300],
-            icon: Icon(
-              Icons.assessment,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.assessment,
-              color: Colors.teal[300],
-            ),
-            title: Text("Planner"),
-          ),
-          BubbleBottomBarItem(
-            backgroundColor: Colors.green,
-            icon: Icon(
-              Icons.trending_up,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.trending_up,
-              color: Colors.green,
-            ),
-            title: Text("Transactions"),
-          ),
-        ],
+        items: getNavigation(),
       ),
       body: pageSetter(),
     );

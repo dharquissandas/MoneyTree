@@ -16,7 +16,9 @@ class Saving {
   String savingsItem;
   double amountSaved;
   double totalAmount;
-  String goalDate;
+  String startDate;
+  String description;
+  int calculated;
 
   Saving(
       {this.id,
@@ -24,16 +26,19 @@ class Saving {
       this.savingsItem,
       this.amountSaved,
       this.totalAmount,
-      this.goalDate});
+      this.startDate,
+      this.description,
+      this.calculated});
 
   factory Saving.fromMap(Map<String, dynamic> json) => new Saving(
-        id: json["id"],
-        savingOrder: json["savingorder"],
-        savingsItem: json["savingsitem"],
-        amountSaved: json["amountsaved"].toDouble(),
-        totalAmount: json["totalamount"].toDouble(),
-        goalDate: json["goaldate"],
-      );
+      id: json["id"],
+      savingOrder: json["savingorder"],
+      savingsItem: json["savingsitem"],
+      amountSaved: json["amountsaved"].toDouble(),
+      totalAmount: json["totalamount"].toDouble(),
+      startDate: json["startdate"],
+      description: json["description"],
+      calculated: json["calculated"]);
 
   Map<String, dynamic> toMap() => {
         "id": id,
@@ -41,6 +46,8 @@ class Saving {
         "savingsitem": savingsItem,
         "amountsaved": amountSaved,
         "totalamount": totalAmount,
-        "goalDate": goalDate,
+        "startdate": startDate,
+        "description": description,
+        "calculated": calculated
       };
 }

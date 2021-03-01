@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:money_tree/models/CalculatedSavingsModel.dart';
 import 'package:money_tree/models/CategoryModel.dart';
 import 'package:money_tree/models/ExpenseTransactionModel.dart';
 import 'package:money_tree/models/IncomeTransactionModel.dart';
@@ -32,6 +33,7 @@ class DBProvider {
     String path = join(documentsDirectory.path, "moneyTree.db");
     return await openDatabase(path, version: 1, onOpen: (db) {},
         onCreate: (Database db, int version) async {
+      //intrans
       await db.execute('''
         CREATE TABLE intrans (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,7 +47,7 @@ class DBProvider {
           FOREIGN KEY (category) REFERENCES incats (id)
         )
       ''');
-
+      //bankcards
       await db.execute('''
         CREATE TABLE bankcards (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,6 +59,7 @@ class DBProvider {
           cardtype TEXT
         )
       ''');
+      //extrans
       await db.execute('''
         CREATE TABLE extrans (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,6 +73,7 @@ class DBProvider {
           FOREIGN KEY (category) REFERENCES excats (id)
         )
       ''');
+      //savings
       await db.execute('''
         CREATE TABLE savings (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,9 +81,23 @@ class DBProvider {
           savingsitem TEXT,
           amountsaved FLOAT,
           totalamount FLOAT,
-          goaldate DATE
+          startdate DATE,
+          description TEXT,
+          calculated INTEGER
         )
       ''');
+      //calculatedsavings
+      await db.execute('''
+        CREATE TABLE calculatedsavings (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          parentid INTEGER,
+          goaldate DATE,
+          feasiblepayment FLOAT,
+          paymentfrequency INTEGER,
+          savingtype INTEGER
+        )
+      ''');
+      //savingstransactions
       await db.execute('''
         CREATE TABLE savingstransactions (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -92,12 +110,14 @@ class DBProvider {
           FOREIGN KEY (saving) REFERENCES savings (id)
         )
       ''');
+      //incats
       await db.execute('''
         CREATE TABLE incats (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT
         )
       ''');
+      //exacts
       await db.execute('''
         CREATE TABLE excats (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -292,20 +312,25 @@ class DBProvider {
 
       var card = await db
           .query("bankcards", where: "id = ?", whereArgs: [it.bankCard]);
+
       BankCard cardfirst =
           card.isNotEmpty ? BankCard.fromMap(card.first) : Null;
 
-      BankCard updatedcard = BankCard(
-        id: it.bankCard,
-        cardNumber: cardfirst.cardNumber,
-        cardName: cardfirst.cardName,
-        expiryDate: cardfirst.expiryDate,
-        amount: (cardfirst.amount - oldit.amount) + it.amount,
-        cardType: cardfirst.cardType,
-      );
-
-      res = await db.update("bankcards", updatedcard.toMap(),
-          where: "id = ?", whereArgs: [it.bankCard]);
+      if (oldit.bankCard == it.bankCard) {
+        BankCard updatedcard = BankCard(
+          id: it.bankCard,
+          cardNumber: cardfirst.cardNumber,
+          cardName: cardfirst.cardName,
+          expiryDate: cardfirst.expiryDate,
+          amount: (cardfirst.amount - oldit.amount) + it.amount,
+          cardType: cardfirst.cardType,
+        );
+        res = await db.update("bankcards", updatedcard.toMap(),
+            where: "id = ?", whereArgs: [it.bankCard]);
+      } else {
+        deleteIncomeTransaction(oldit);
+        newIncomeTransaction(it);
+      }
     });
 
     return res;
@@ -436,17 +461,22 @@ class DBProvider {
       BankCard cardfirst =
           card.isNotEmpty ? BankCard.fromMap(card.first) : Null;
 
-      BankCard updatedcard = BankCard(
-        id: et.bankCard,
-        cardNumber: cardfirst.cardNumber,
-        cardName: cardfirst.cardName,
-        expiryDate: cardfirst.expiryDate,
-        amount: (cardfirst.amount + oldet.amount) - et.amount,
-        cardType: cardfirst.cardType,
-      );
+      if (oldet.bankCard == et.bankCard) {
+        BankCard updatedcard = BankCard(
+          id: et.bankCard,
+          cardNumber: cardfirst.cardNumber,
+          cardName: cardfirst.cardName,
+          expiryDate: cardfirst.expiryDate,
+          amount: (cardfirst.amount + oldet.amount) - et.amount,
+          cardType: cardfirst.cardType,
+        );
 
-      res = await db.update("bankcards", updatedcard.toMap(),
-          where: "id = ?", whereArgs: [et.bankCard]);
+        res = await db.update("bankcards", updatedcard.toMap(),
+            where: "id = ?", whereArgs: [et.bankCard]);
+      } else {
+        deleteExpenseTransaction(oldet);
+        newExpenseTransaction(et);
+      }
     });
 
     return res;
@@ -473,16 +503,17 @@ class DBProvider {
     final db = await database;
     var res = await db.rawInsert('''
       INSERT INTO savings (
-        savingorder, savingsitem, amountsaved, totalamount, goaldate
-      ) VALUES (?, ?, ?, ?, ?)
+        savingorder, savingsitem, amountsaved, totalamount, startdate, description, calculated
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
     ''', [
       saving.savingOrder,
       saving.savingsItem,
       saving.amountSaved,
       saving.totalAmount,
-      saving.goalDate
+      saving.startDate,
+      saving.description,
+      saving.calculated
     ]);
-
     return res;
   }
 
@@ -529,6 +560,35 @@ class DBProvider {
     db.delete("savings", where: "id = ?", whereArgs: [id]);
   }
 
+  //Calculated Savings
+  newCalculatedSaving(CalculatedSaving cs) async {
+    final db = await database;
+    var res = await db.rawInsert('''
+      INSERT INTO calculatedsavings (
+          goalDate,
+          parentid,
+          feasiblepayment,
+          paymentfrequency,
+          savingtype
+      ) VALUES (?, ?, ?, ?, ?)
+    ''', [
+      cs.goalDate,
+      cs.parentId,
+      cs.feasiblePayment,
+      cs.paymentFrequency,
+      cs.savingType
+    ]);
+
+    return res;
+  }
+
+  Future<CalculatedSaving> getCalculateSavingByParentId(int pid) async {
+    final db = await database;
+    var res = await db
+        .query("calculatedsavings", where: "parentid = ?", whereArgs: [pid]);
+    return res.isNotEmpty ? CalculatedSaving.fromMap(res.first) : Null;
+  }
+
   //Savings Transactions
   newSavingTransaction(SavingTransaction savingtrans) async {
     final db = await database;
@@ -550,12 +610,14 @@ class DBProvider {
         saving.isNotEmpty ? Saving.fromMap(saving.first) : Null;
 
     Saving updatedsaving = Saving(
-      id: savingtrans.saving,
-      savingsItem: savingfirst.savingsItem,
-      amountSaved: savingfirst.amountSaved + savingtrans.paymentamount,
-      totalAmount: savingfirst.totalAmount,
-      goalDate: savingfirst.goalDate,
-    );
+        id: savingtrans.saving,
+        savingOrder: savingfirst.savingOrder,
+        savingsItem: savingfirst.savingsItem,
+        amountSaved: savingfirst.amountSaved + savingtrans.paymentamount,
+        totalAmount: savingfirst.totalAmount,
+        startDate: savingfirst.startDate,
+        description: savingfirst.description,
+        calculated: savingfirst.calculated);
 
     res = await db.update("savings", updatedsaving.toMap(),
         where: "id = ?", whereArgs: [savingtrans.saving]);
@@ -581,11 +643,9 @@ class DBProvider {
 
   Future<SavingTransaction> getSavingTransById(id) async {
     final db = await database;
-    print(id);
     var res = await db.rawQuery('''
     SELECT * FROM savingstransactions WHERE id = ?
     ''', [id]);
-    print(res.first);
     return res.isNotEmpty ? SavingTransaction.fromMap(res.first) : Null;
   }
 
@@ -647,17 +707,21 @@ class DBProvider {
       BankCard cardfirst =
           card.isNotEmpty ? BankCard.fromMap(card.first) : Null;
 
-      BankCard updatedcard = BankCard(
-        id: st.paymentaccount,
-        cardNumber: cardfirst.cardNumber,
-        cardName: cardfirst.cardName,
-        expiryDate: cardfirst.expiryDate,
-        amount: (cardfirst.amount - oldst.paymentamount) + st.paymentamount,
-        cardType: cardfirst.cardType,
-      );
-
-      res = await db.update("bankcards", updatedcard.toMap(),
-          where: "id = ?", whereArgs: [st.paymentaccount]);
+      if (oldst.paymentaccount == st.paymentaccount) {
+        BankCard updatedcard = BankCard(
+          id: st.paymentaccount,
+          cardNumber: cardfirst.cardNumber,
+          cardName: cardfirst.cardName,
+          expiryDate: cardfirst.expiryDate,
+          amount: (cardfirst.amount - oldst.paymentamount) + st.paymentamount,
+          cardType: cardfirst.cardType,
+        );
+        res = await db.update("bankcards", updatedcard.toMap(),
+            where: "id = ?", whereArgs: [st.paymentaccount]);
+      } else {
+        deleteSavingTrans(oldst);
+        newSavingTransaction(st);
+      }
 
       getSavingById(st.saving).then((value) {
         Saving updatedSaving = Saving(
@@ -667,9 +731,9 @@ class DBProvider {
             amountSaved:
                 (value.amountSaved - oldst.paymentamount) + st.paymentamount,
             totalAmount: value.totalAmount,
-            goalDate: value.goalDate);
-
-        print(updatedSaving.amountSaved);
+            startDate: value.startDate,
+            description: value.description,
+            calculated: value.calculated);
 
         updateSaving(id, updatedSaving);
       });
@@ -701,12 +765,31 @@ class DBProvider {
           savingsItem: s.savingsItem,
           amountSaved: s.amountSaved - st.paymentamount,
           totalAmount: s.totalAmount,
-          goalDate: s.goalDate);
+          startDate: s.startDate,
+          description: s.description,
+          calculated: s.calculated);
 
       updateSaving(s.id, updatedSaving);
     });
 
     db.delete("savingstransactions", where: "id = ?", whereArgs: [st.id]);
+  }
+
+  Future<double> getSavingTotalForTimeFrame(
+      savingsid, startDate, endDate) async {
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM savingstransactions WHERE `paymentdate` >= ? and `paymentdate` <= ?
+    and `saving` = ?''', [startDate, endDate, savingsid]);
+    List<SavingTransaction> amounts = res.isNotEmpty
+        ? res.map((e) => SavingTransaction.fromMap(e)).toList()
+        : [];
+
+    double amount = 0;
+    for (var i = 0; i < amounts.length; i++) {
+      amount = amount + amounts[i].paymentamount;
+    }
+    return amount;
   }
 
   //Categories

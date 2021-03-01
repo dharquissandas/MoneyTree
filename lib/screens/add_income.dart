@@ -55,6 +55,7 @@ class _AddIncomeState extends State<AddIncome> {
       setState(() {
         incomebankcard = null;
         incomecategory = null;
+        incomeid = -1;
         _date.value =
             TextEditingValue(text: DateTime.now().toString().substring(0, 10));
       });

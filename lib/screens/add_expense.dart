@@ -55,6 +55,7 @@ class _AddExpenseState extends State<AddExpense> {
       setState(() {
         expensebankcard = null;
         expensecategory = null;
+        expenseid = -1;
         _date.value =
             TextEditingValue(text: DateTime.now().toString().substring(0, 10));
       });

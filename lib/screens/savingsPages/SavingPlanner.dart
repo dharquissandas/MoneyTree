@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:money_tree/models/CalculatedSavingsModel.dart';
 import 'package:money_tree/models/SavingsModel.dart';
 import 'package:money_tree/models/SavingsTransactionModel.dart';
-import 'package:money_tree/screens/add_saving.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
 

@@ -1,14 +1,16 @@
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:money_tree/screens/CardOrganiser.dart';
-import 'package:money_tree/screens/Dashboard.dart';
-import 'package:money_tree/screens/TransInputLayout.dart';
-import 'package:money_tree/screens/TreesPage.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:money_tree/screens/preferences/CardOrganiser.dart';
+import 'package:money_tree/screens/homePages/Dashboard.dart';
+import 'package:money_tree/screens/forms/TransInputLayout.dart';
+import 'package:money_tree/screens/homePages/TreesPage.dart';
+import 'package:money_tree/screens/preferences/SavingsOrganiser.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:money_tree/screens/ExpensePage.dart';
-import 'package:money_tree/screens/IncomePage.dart';
+import 'package:money_tree/screens/homePages/ExpensePage.dart';
+import 'package:money_tree/screens/homePages/IncomePage.dart';
 import 'package:money_tree/utils/Preferences.dart';
-import 'SavingsOrganiser.dart';
+import 'package:money_tree/utils/Notifications.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -17,6 +19,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int pageIndex;
+
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
@@ -120,6 +125,45 @@ class _HomeState extends State<Home> {
                               (r) => false);
                         },
                         child: const Text('Euros (€)'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              title: Text('Notifications'),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => SimpleDialog(
+                    title: const Text('Show Daily Notifications'),
+                    children: <Widget>[
+                      SimpleDialogOption(
+                        onPressed: () {
+                          scheduleRecorruingNotification(
+                              flutterLocalNotificationsPlugin);
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              PageTransition(
+                                  type: PageTransitionType.rightToLeft,
+                                  child: Home()),
+                              (r) => false);
+                        },
+                        child: const Text('Allow Notifications'),
+                      ),
+                      SimpleDialogOption(
+                        onPressed: () {
+                          turnReoccuringNotificationOff(
+                              flutterLocalNotificationsPlugin);
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              PageTransition(
+                                  type: PageTransitionType.rightToLeft,
+                                  child: Home()),
+                              (r) => false);
+                        },
+                        child: const Text('Disable Notifications'),
                       ),
                     ],
                   ),

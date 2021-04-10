@@ -7,7 +7,7 @@ import 'package:money_tree/utils/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
 import 'package:page_transition/page_transition.dart';
 
-import 'TransInputLayout.dart';
+import '../forms/TransInputLayout.dart';
 
 class SavingsPage extends StatefulWidget {
   final int saving;

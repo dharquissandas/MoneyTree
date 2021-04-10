@@ -1,11 +1,11 @@
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:money_tree/models/BankCardModel.dart';
-import 'package:money_tree/screens/BudgetInfo.dart';
-import 'package:money_tree/screens/BudgetPlanner.dart';
-import 'package:money_tree/screens/BudgetSavings..dart';
-import 'package:money_tree/screens/BudgetTransactions.dart';
-import 'package:money_tree/screens/add_budget.dart';
+import 'package:money_tree/screens/budgetPages/BudgetInfo.dart';
+import 'package:money_tree/screens/budgetPages/BudgetPlanner.dart';
+import 'package:money_tree/screens/budgetPages/BudgetSavings.dart';
+import 'package:money_tree/screens/budgetPages/BudgetTransactions.dart';
+import 'package:money_tree/screens/forms/add_budget.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:page_transition/page_transition.dart';
 

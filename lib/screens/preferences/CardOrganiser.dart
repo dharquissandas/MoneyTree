@@ -2,29 +2,28 @@ import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:money_tree/models/SavingsModel.dart';
-import 'package:money_tree/screens/add_saving_goal.dart';
+import 'package:money_tree/models/BankCardModel.dart';
+import 'package:money_tree/screens/layoutManagers/HomeLayout.dart';
+import 'package:money_tree/screens/forms/add_bankcard.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
 import 'package:page_transition/page_transition.dart';
 
-import 'HomeLayout.dart';
-
-class SavingsOrganiser extends StatefulWidget {
+class CardOrganiser extends StatefulWidget {
   @override
-  _SavingsOrganiserState createState() => _SavingsOrganiserState();
+  _CardOrganiserState createState() => _CardOrganiserState();
 }
 
-class _SavingsOrganiserState extends State<SavingsOrganiser> {
-  List<Saving> slist = List<Saving>();
+class _CardOrganiserState extends State<CardOrganiser> {
+  List<BankCard> bclist = List<BankCard>();
   String currency = "";
 
   @override
   void initState() {
     getCurrency().then((value) => currency = value);
-    DBProvider.db.getSavings().then((value) {
+    DBProvider.db.getBankCards().then((value) {
       setState(() {
-        slist = value;
+        bclist = value;
       });
     });
     super.initState();
@@ -37,7 +36,7 @@ class _SavingsOrganiserState extends State<SavingsOrganiser> {
         backgroundColor: Colors.white,
         iconTheme: IconThemeData(color: Colors.black),
         title: Text(
-          "Organise Saving Trees",
+          "Organise Bank Cards",
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
@@ -50,9 +49,10 @@ class _SavingsOrganiserState extends State<SavingsOrganiser> {
             elevation: 20,
             label: Text("Confirm"),
             onPressed: () {
-              for (var i = 0; i < slist.length; i++) {
-                DBProvider.db.updateSavingOrder(i, slist[i].id);
+              for (var i = 0; i < bclist.length; i++) {
+                DBProvider.db.updateBankCardOrder(i, bclist[i].id);
               }
+
               Navigator.pushAndRemoveUntil(
                   context,
                   PageTransition(
@@ -69,40 +69,39 @@ class _SavingsOrganiserState extends State<SavingsOrganiser> {
                 if (newIndex > oldIndex) {
                   newIndex -= 1;
                 }
-                final Saving item = slist.removeAt(oldIndex);
-                item.savingOrder = newIndex;
-                slist.insert(newIndex, item);
+                final BankCard item = bclist.removeAt(oldIndex);
+                item.cardOrder = newIndex;
+                bclist.insert(newIndex, item);
               },
             );
           },
           children: List.generate(
-            slist.length,
+            bclist.length,
             (index) {
-              Saving s = slist[index];
+              BankCard bc = bclist[index];
               return GestureDetector(
-                key: Key(s.id.toString()),
+                key: Key(bc.id.toString()),
                 onTap: () {
                   Navigator.push(
                     context,
                     PageTransition(
-                      type: PageTransitionType.rightToLeft,
-                      child: AddSavingGoal(
-                        s: s,
-                      ),
-                    ),
+                        type: PageTransitionType.rightToLeft,
+                        child: AddBankCard(
+                          bc: bc,
+                        )),
                   );
                 },
                 child: Dismissible(
-                  key: Key(s.id.toString()),
+                  key: Key(bc.id.toString()),
                   confirmDismiss: (DismissDirection direction) async {
                     return await showDialog(
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          key: Key(s.id.toString()),
-                          title: const Text("Delete Saving Tree"),
+                          key: Key(bc.id.toString()),
+                          title: const Text("Delete Card"),
                           content: const Text(
-                              "Deleting this saving will also delete all transactions associated with this saving. Do you wish to delete this saving?"),
+                              "Deleting this card will also delete all transactions associated with this card. Do you wish to delete this card?"),
                           actions: <Widget>[
                             FlatButton(
                                 onPressed: () =>
@@ -118,10 +117,10 @@ class _SavingsOrganiserState extends State<SavingsOrganiser> {
                     );
                   },
                   onDismissed: (direction) {
-                    DBProvider.db.deleteSavingGoal(s.id);
+                    DBProvider.db.deleteBankCardById(bc.id);
                   },
                   child: Container(
-                    key: Key(s.id.toString()),
+                    key: Key(bc.id.toString()),
                     height: 70,
                     margin: EdgeInsets.only(bottom: 13),
                     padding: EdgeInsets.only(
@@ -148,25 +147,27 @@ class _SavingsOrganiserState extends State<SavingsOrganiser> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
                                 Text(
-                                  s.savingsItem,
+                                  bc.cardName,
                                   style: GoogleFonts.inter(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
                                       color: Colors.black),
                                 ),
-                                // Text(
-                                //   formatDate(
-                                //       DateTime(
-                                //           int.parse(s.goalDate.substring(0, 4)),
-                                //           int.parse(s.goalDate.substring(5, 7)),
-                                //           int.parse(
-                                //               s.goalDate.substring(8, 10))),
-                                //       [d, ' ', M, ' ', yyyy]).toString(),
-                                //   style: GoogleFonts.inter(
-                                //       fontSize: 13,
-                                //       fontWeight: FontWeight.w700,
-                                //       color: Colors.grey),
-                                // ),
+                                Text(
+                                  formatDate(
+                                      DateTime(
+                                          int.parse(
+                                              bc.expiryDate.substring(0, 4)),
+                                          int.parse(
+                                              bc.expiryDate.substring(5, 7)),
+                                          int.parse(
+                                              bc.expiryDate.substring(8, 10))),
+                                      [d, ' ', M, ' ', yyyy]).toString(),
+                                  style: GoogleFonts.inter(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.grey),
+                                ),
                               ],
                             ),
                           ],
@@ -175,7 +176,7 @@ class _SavingsOrganiserState extends State<SavingsOrganiser> {
                           children: <Widget>[
                             Text(
                                 currency +
-                                    FlutterMoneyFormatter(amount: s.totalAmount)
+                                    FlutterMoneyFormatter(amount: bc.amount)
                                         .output
                                         .nonSymbol,
                                 style: GoogleFonts.inter(

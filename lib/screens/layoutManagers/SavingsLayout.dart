@@ -1,10 +1,10 @@
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:money_tree/models/SavingsModel.dart';
-import 'package:money_tree/screens/SavingInfo.dart';
-import 'package:money_tree/screens/SavingPlanner.dart';
-import 'package:money_tree/screens/SavingsPage.dart';
-import 'package:money_tree/screens/TransInputLayout.dart';
+import 'package:money_tree/screens/savingsPages/SavingInfo.dart';
+import 'package:money_tree/screens/savingsPages/SavingPlanner.dart';
+import 'package:money_tree/screens/savingsPages/SavingsPage.dart';
+import 'package:money_tree/screens/forms/TransInputLayout.dart';
 import 'package:page_transition/page_transition.dart';
 
 class SavingsLayout extends StatefulWidget {

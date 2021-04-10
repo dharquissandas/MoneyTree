@@ -1,8 +1,8 @@
 import 'package:currency_textfield/currency_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:money_tree/models/BankCardModel.dart';
-import 'package:money_tree/screens/CardOrganiser.dart';
-import 'package:money_tree/screens/HomeLayout.dart';
+import 'package:money_tree/screens/preferences/CardOrganiser.dart';
+import 'package:money_tree/screens/layoutManagers/HomeLayout.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:flutter/services.dart';

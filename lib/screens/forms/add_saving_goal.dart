@@ -1,14 +1,12 @@
 import 'package:currency_textfield/currency_textfield.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:money_tree/models/CalculatedSavingsModel.dart';
 import 'package:money_tree/models/SavingsModel.dart';
-import 'package:money_tree/screens/SavingsOrganiser.dart';
+import 'package:money_tree/screens/layoutManagers/HomeLayout.dart';
+import 'package:money_tree/screens/preferences/SavingsOrganiser.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:money_tree/utils/Preferences.dart';
-
-import 'HomeLayout.dart';
 
 class AddSavingGoal extends StatefulWidget {
   final Saving s;

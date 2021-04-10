@@ -2,24 +2,27 @@ import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:money_tree/models/IncomeTransactionModel.dart';
+import 'package:money_tree/models/BankCardModel.dart';
+import 'package:money_tree/models/ExpenseTransactionModel.dart';
+import 'package:money_tree/screens/forms/TransInputLayout.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
 import 'package:month_picker_strip/month_picker_strip.dart';
 import 'package:page_transition/page_transition.dart';
 
-import 'TransInputLayout.dart';
-
-class IncomePage extends StatefulWidget {
+class BudgetTransactions extends StatefulWidget {
+  final BankCard bankCard;
+  BudgetTransactions({Key key, @required this.bankCard}) : super(key: key);
   @override
-  _IncomePageState createState() => _IncomePageState();
+  _BudgetTransactionsState createState() => _BudgetTransactionsState();
 }
 
-class _IncomePageState extends State<IncomePage> {
+class _BudgetTransactionsState extends State<BudgetTransactions> {
   DateTime selectedMonth;
   DateTime currMonth;
   DateTime fromMonth;
 
+  bool need = true;
   String currency = "";
 
   @override
@@ -37,7 +40,8 @@ class _IncomePageState extends State<IncomePage> {
         physics: BouncingScrollPhysics(),
         children: [
           FutureBuilder<dynamic>(
-              future: DBProvider.db.getFirstIncomeTransaction(),
+              future:
+                  DBProvider.db.getFirstTransactionforCard(widget.bankCard.id),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                 if (snapshot.hasData && snapshot.data != Null) {
                   return Container(
@@ -63,18 +67,53 @@ class _IncomePageState extends State<IncomePage> {
           Divider(
             height: 1.0,
           ),
+          Padding(
+            padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Text(need ? "Need Transactions" : "Want Transactions",
+                    style: GoogleFonts.inter(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF3A3A3A))),
+                RaisedButton(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18.0),
+                      side: BorderSide(color: Colors.teal[300])),
+                  onPressed: () {
+                    setState(() {
+                      if (need) {
+                        need = false;
+                      } else {
+                        need = true;
+                      }
+                    });
+                  },
+                  color: Colors.teal[300],
+                  textColor: Colors.white,
+                  child: Text(need ? "WANT" : "NEED",
+                      style: TextStyle(fontSize: 12)),
+                ),
+              ],
+            ),
+          ),
           SizedBox(
             height: 10,
             width: double.infinity,
           ),
-          FutureBuilder<List<IncomeTransaction>>(
-            future:
-                DBProvider.db.getIncomeTransactionListbyMonth(selectedMonth),
+          FutureBuilder<List<ExpenseTransaction>>(
+            future: need
+                ? DBProvider.db.getMonthNeedExpenseTransactions(
+                    widget.bankCard.id, selectedMonth)
+                : DBProvider.db.getMonthWantExpenseTransactions(
+                    widget.bankCard.id, selectedMonth),
             builder: (BuildContext context,
-                AsyncSnapshot<List<IncomeTransaction>> snapshot) {
+                AsyncSnapshot<List<ExpenseTransaction>> snapshot) {
               if (snapshot.hasData) {
                 if (snapshot.data.length == 0) {
-                  return Center(child: Text("No Income Transactions"));
+                  return Center(child: Text("No Expense Transactions"));
                 } else {
                   return ListView.builder(
                     itemCount: snapshot.data.length,
@@ -82,7 +121,7 @@ class _IncomePageState extends State<IncomePage> {
                     shrinkWrap: true,
                     physics: BouncingScrollPhysics(),
                     itemBuilder: (BuildContext context, int index) {
-                      IncomeTransaction it = snapshot.data[index];
+                      ExpenseTransaction et = snapshot.data[index];
                       return Container(
                         margin: EdgeInsets.only(bottom: 13),
                         child: InkWell(
@@ -93,8 +132,8 @@ class _IncomePageState extends State<IncomePage> {
                                 PageTransition(
                                     type: PageTransitionType.rightToLeft,
                                     child: TransInput(
-                                      page: 0,
-                                      transaction: it,
+                                      page: 1,
+                                      transaction: et,
                                       saving: null,
                                     )));
                           },
@@ -126,7 +165,7 @@ class _IncomePageState extends State<IncomePage> {
                                           MainAxisAlignment.center,
                                       children: <Widget>[
                                         Text(
-                                          it.name,
+                                          et.name,
                                           style: GoogleFonts.inter(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w700,
@@ -136,10 +175,10 @@ class _IncomePageState extends State<IncomePage> {
                                           formatDate(
                                               DateTime(
                                                   int.parse(
-                                                      it.date.substring(0, 4)),
+                                                      et.date.substring(0, 4)),
                                                   int.parse(
-                                                      it.date.substring(5, 7)),
-                                                  int.parse(it.date
+                                                      et.date.substring(5, 7)),
+                                                  int.parse(et.date
                                                       .substring(8, 10))),
                                               [
                                                 d,
@@ -162,7 +201,7 @@ class _IncomePageState extends State<IncomePage> {
                                     Text(
                                       currency +
                                           FlutterMoneyFormatter(
-                                                  amount: it.amount)
+                                                  amount: et.amount)
                                               .output
                                               .nonSymbol,
                                       style: GoogleFonts.inter(
@@ -173,7 +212,7 @@ class _IncomePageState extends State<IncomePage> {
                                     InkWell(
                                       onTap: () {
                                         DBProvider.db
-                                            .deleteIncomeTransaction(it);
+                                            .deleteExpenseTransaction(et);
                                         setState(() {});
                                       },
                                       child: Container(

@@ -4,13 +4,12 @@ import 'package:money_tree/models/ExpenseTransactionModel.dart';
 import 'package:money_tree/models/IncomeTransactionModel.dart';
 import 'package:money_tree/models/SavingsModel.dart';
 import 'package:money_tree/models/SavingsTransactionModel.dart';
-import 'package:money_tree/screens/add_expense.dart';
-import 'package:money_tree/screens/add_income.dart';
-import 'package:money_tree/screens/add_saving.dart';
+import 'package:money_tree/screens/forms/add_expense.dart';
+import 'package:money_tree/screens/forms/add_income.dart';
+import 'package:money_tree/screens/forms/add_saving.dart';
+import 'package:money_tree/screens/layoutManagers/HomeLayout.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:page_transition/page_transition.dart';
-
-import 'HomeLayout.dart';
 
 class TransInput extends StatefulWidget {
   final int page;

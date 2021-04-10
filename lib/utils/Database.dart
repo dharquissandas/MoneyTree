@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:money_tree/models/BudgetModel.dart';
 import 'package:money_tree/models/CalculatedSavingsModel.dart';
 import 'package:money_tree/models/CategoryModel.dart';
 import 'package:money_tree/models/ExpenseTransactionModel.dart';
@@ -68,6 +69,7 @@ class DBProvider {
           category INTEGER,
           amount FLOAT,
           reoccur BIT,
+          need BIT,
           bankcard INTEGER,
           FOREIGN KEY (bankcard) REFERENCES bankcards (id),
           FOREIGN KEY (category) REFERENCES excats (id)
@@ -117,6 +119,29 @@ class DBProvider {
           name TEXT
         )
       ''');
+      //cardbudgets
+      await db.execute('''
+        CREATE TABLE cardbudgets (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          bankcard INTEGER,
+          month DATE,
+          need INTEGER,
+          want INTEGER,
+          save INTEGER,
+          foodamount FLOAT,
+          sociallifeamount FLOAT,
+          selfdevamount FLOAT,
+          cultureamount FLOAT,
+          householdamount FLOAT,
+          apperalamount FLOAT,
+          beautyamount FLOAT,
+          healthamount FLOAT,
+          educationamount FLOAT,
+          giftamount FLOAT,
+          techamount FLOAT,
+          FOREIGN KEY (bankcard) REFERENCES bankcards (id)
+        )
+      ''');
       //exacts
       await db.execute('''
         CREATE TABLE excats (
@@ -140,7 +165,7 @@ class DBProvider {
       await db.execute('''INSERT INTO excats (name) VALUES ('Health')''');
       await db.execute('''INSERT INTO excats (name) VALUES ('Education')''');
       await db.execute('''INSERT INTO excats (name) VALUES ('Gift')''');
-      await db.execute('''INSERT INTO excats (name) VALUES ('Savings')''');
+      await db.execute('''INSERT INTO excats (name) VALUES ('Technology')''');
     });
   }
 
@@ -250,6 +275,66 @@ class DBProvider {
     return intranslist;
   }
 
+  Future<List<IncomeTransaction>> getIncomeTransactionbyCardandMonth(
+      int card, DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String startDate = strYear + "-" + strMonth + "-01";
+    String endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM intrans WHERE bankcard = ? AND date >= ? AND date <= ?
+    ''', [card, startDate, endDate]);
+    List<IncomeTransaction> intranslist = res.isNotEmpty
+        ? res.map((e) => IncomeTransaction.fromMap(e)).toList()
+        : [];
+    return intranslist;
+  }
+
+  Future<List<IncomeTransaction>> getIncomeTransactionListbyMonth(
+      DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String startDate = strYear + "-" + strMonth + "-01";
+    String endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM intrans WHERE date >= ? AND date <= ? ORDER BY date DESC
+    ''', [startDate, endDate]);
+    List<IncomeTransaction> intranslist = res.isNotEmpty
+        ? res.map((e) => IncomeTransaction.fromMap(e)).toList()
+        : [];
+    return intranslist;
+  }
+
   Future<List<IncomeTransaction>> getIncomeTransactionbyDate(date) async {
     String curdate = date.toString().substring(0, 10);
     final db = await database;
@@ -296,10 +381,57 @@ class DBProvider {
     return amount;
   }
 
+  Future<double> getMonthIncome(int card, DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String startDate = strYear + "-" + strMonth + "-01";
+    String endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM intrans WHERE bankcard = ? AND date >= ? AND date <= ?
+    ''', [card, startDate, endDate]);
+    List<IncomeTransaction> amounts = res.isNotEmpty
+        ? res.map((e) => IncomeTransaction.fromMap(e)).toList()
+        : [];
+
+    double amount = 0;
+    for (var i = 0; i < amounts.length; i++) {
+      amount = amount + amounts[i].amount;
+    }
+    return amount;
+  }
+
   getIncomeTransById(id) async {
     final db = await database;
     var res = await db.query("intrans", where: "id = ?", whereArgs: [id]);
     return res.isNotEmpty ? IncomeTransaction.fromMap(res.first) : Null;
+  }
+
+  getFirstIncomeTransaction() async {
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM intrans ORDER BY date ASC Limit 1
+    ''');
+
+    dynamic firstres = res.isNotEmpty
+        ? DateTime.parse(IncomeTransaction.fromMap(res.first).date)
+        : Null;
+
+    return firstres;
   }
 
   updateIncomeTransaction(int id, IncomeTransaction it) async {
@@ -357,14 +489,15 @@ class DBProvider {
     final db = await database;
     var res = await db.rawInsert('''
       INSERT INTO extrans (
-        name, date, category, amount, bankcard, reoccur
-      ) VALUES (?, ?, ?, ?, ?, ?)
+        name, date, category, amount, bankcard, need, reoccur
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
     ''', [
       expenseTrans.name,
       expenseTrans.date,
       expenseTrans.category,
       expenseTrans.amount,
       expenseTrans.bankCard,
+      expenseTrans.need,
       expenseTrans.reoccur
     ]);
 
@@ -396,12 +529,72 @@ class DBProvider {
     return extranslist;
   }
 
+  Future<List<ExpenseTransaction>> getExpenseTransactionbyCardandMonth(
+      int card, DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String startDate = strYear + "-" + strMonth + "-01";
+    String endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM extrans WHERE bankcard = ? AND date >= ? AND date <= ?
+    ''', [card, startDate, endDate]);
+    List<ExpenseTransaction> extranslist = res.isNotEmpty
+        ? res.map((e) => ExpenseTransaction.fromMap(e)).toList()
+        : [];
+    return extranslist;
+  }
+
   Future<List<ExpenseTransaction>> getExpenseTransactionbyDate(date) async {
     String curdate = date.toString().substring(0, 10);
     final db = await database;
     var res = await db.rawQuery('''
       SELECT * FROM extrans WHERE date = ?
     ''', [curdate]);
+    List<ExpenseTransaction> extranslist = res.isNotEmpty
+        ? res.map((e) => ExpenseTransaction.fromMap(e)).toList()
+        : [];
+    return extranslist;
+  }
+
+  Future<List<ExpenseTransaction>> getExpenseTransactionListbyMonth(
+      DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String startDate = strYear + "-" + strMonth + "-01";
+    String endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM extrans WHERE date >= ? AND date <= ? ORDER BY date DESC
+    ''', [startDate, endDate]);
     List<ExpenseTransaction> extranslist = res.isNotEmpty
         ? res.map((e) => ExpenseTransaction.fromMap(e)).toList()
         : [];
@@ -442,10 +635,269 @@ class DBProvider {
     return amount;
   }
 
+  Future<double> getMonthExpense(int card, DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String startDate = strYear + "-" + strMonth + "-01";
+    String endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM extrans WHERE bankcard = ? AND date >= ? AND date <= ?
+    ''', [card, startDate, endDate]);
+    List<ExpenseTransaction> amounts = res.isNotEmpty
+        ? res.map((e) => ExpenseTransaction.fromMap(e)).toList()
+        : [];
+
+    double amount = 0;
+    for (var i = 0; i < amounts.length; i++) {
+      amount = amount + amounts[i].amount;
+    }
+    return amount;
+  }
+
+  Future<Map<String, double>> getMonthExpenseCategoryList(
+      int card, DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String startDate = strYear + "-" + strMonth + "-01";
+    String endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM extrans WHERE bankcard = ? AND date >= ? AND date <= ?
+    ''', [card, startDate, endDate]);
+    List<ExpenseTransaction> amounts = res.isNotEmpty
+        ? res.map((e) => ExpenseTransaction.fromMap(e)).toList()
+        : [];
+
+    double food = 0;
+    double sociallife = 0;
+    double selfdev = 0;
+    double culture = 0;
+    double household = 0;
+    double apperal = 0;
+    double beauty = 0;
+    double health = 0;
+    double education = 0;
+    double gift = 0;
+    double tech = 0;
+    double total = 0;
+    for (var i = 0; i < amounts.length; i++) {
+      if (amounts[i].category == 1) {
+        food = food + amounts[i].amount;
+      } else if (amounts[i].category == 2) {
+        sociallife = sociallife + amounts[i].amount;
+      } else if (amounts[i].category == 3) {
+        selfdev = selfdev + amounts[i].amount;
+      } else if (amounts[i].category == 4) {
+        culture = culture + amounts[i].amount;
+      } else if (amounts[i].category == 5) {
+        household = household + amounts[i].amount;
+      } else if (amounts[i].category == 6) {
+        apperal = apperal + amounts[i].amount;
+      } else if (amounts[i].category == 7) {
+        beauty = beauty + amounts[i].amount;
+      } else if (amounts[i].category == 8) {
+        health = health + amounts[i].amount;
+      } else if (amounts[i].category == 9) {
+        education = education + amounts[i].amount;
+      } else if (amounts[i].category == 10) {
+        gift = gift + amounts[i].amount;
+      } else {
+        tech = tech + amounts[i].amount;
+      }
+      total = total + amounts[i].amount;
+    }
+
+    Map<String, double> finalmap = {
+      'Food': food,
+      'Social Life': sociallife,
+      'Self-Development': selfdev,
+      'Culture': culture,
+      'Household': household,
+      'Apperal': apperal,
+      'Beauty': beauty,
+      'Health': health,
+      'Education': education,
+      'Gift': gift,
+      'Technology': tech,
+      'Total': total
+    };
+    return finalmap;
+  }
+
+  Future<double> getMonthNeedExpense(int card, DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String startDate = strYear + "-" + strMonth + "-01";
+    String endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM extrans WHERE bankcard = ? AND need == 1 AND date >= ? AND date <= ?
+    ''', [card, startDate, endDate]);
+    List<ExpenseTransaction> amounts = res.isNotEmpty
+        ? res.map((e) => ExpenseTransaction.fromMap(e)).toList()
+        : [];
+
+    double amount = 0;
+    for (var i = 0; i < amounts.length; i++) {
+      amount = amount + amounts[i].amount;
+    }
+    return amount;
+  }
+
+  Future<List<ExpenseTransaction>> getMonthNeedExpenseTransactions(
+      int card, DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String startDate = strYear + "-" + strMonth + "-01";
+    String endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM extrans WHERE bankcard = ? AND need == 1 AND date >= ? AND date <= ?
+    ''', [card, startDate, endDate]);
+    List<ExpenseTransaction> amounts = res.isNotEmpty
+        ? res.map((e) => ExpenseTransaction.fromMap(e)).toList()
+        : [];
+    return amounts;
+  }
+
+  Future<double> getMonthWantExpense(int card, DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String startDate = strYear + "-" + strMonth + "-01";
+    String endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM extrans WHERE bankcard = ? AND need == 0 AND date >= ? AND date <= ?
+    ''', [card, startDate, endDate]);
+    List<ExpenseTransaction> amounts = res.isNotEmpty
+        ? res.map((e) => ExpenseTransaction.fromMap(e)).toList()
+        : [];
+
+    double amount = 0;
+    for (var i = 0; i < amounts.length; i++) {
+      amount = amount + amounts[i].amount;
+    }
+    return amount;
+  }
+
+  Future<List<ExpenseTransaction>> getMonthWantExpenseTransactions(
+      int card, DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String startDate = strYear + "-" + strMonth + "-01";
+    String endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM extrans WHERE bankcard = ? AND need == 0 AND date >= ? AND date <= ?
+    ''', [card, startDate, endDate]);
+    List<ExpenseTransaction> amounts = res.isNotEmpty
+        ? res.map((e) => ExpenseTransaction.fromMap(e)).toList()
+        : [];
+    return amounts;
+  }
+
   getExpenseTransById(id) async {
     final db = await database;
     var res = await db.query("extrans", where: "id = ?", whereArgs: [id]);
     return res.isNotEmpty ? ExpenseTransaction.fromMap(res.first) : Null;
+  }
+
+  getFirstExpenseTransaction() async {
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM extrans ORDER BY date ASC Limit 1
+    ''');
+
+    dynamic firstres = res.isNotEmpty
+        ? DateTime.parse(ExpenseTransaction.fromMap(res.first).date)
+        : Null;
+
+    return firstres;
   }
 
   updateExpenseTransaction(int id, ExpenseTransaction et) async {
@@ -694,6 +1146,19 @@ class DBProvider {
     return amount;
   }
 
+  getFirstSavingsTransaction() async {
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM extrans ORDER BY date ASC Limit 1
+    ''');
+
+    dynamic firstres = res.isNotEmpty
+        ? DateTime.parse(ExpenseTransaction.fromMap(res.first).date)
+        : Null;
+
+    return firstres;
+  }
+
   updateSavingTransaction(int id, SavingTransaction st) async {
     final db = await database;
     var res;
@@ -792,6 +1257,143 @@ class DBProvider {
     return amount;
   }
 
+  Future<double> getMonthSavingTrans(int card, DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String startDate = strYear + "-" + strMonth + "-01";
+    String endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM savingstransactions WHERE paymentaccount = ? AND paymentdate >= ? AND paymentdate <= ?
+    ''', [card, startDate, endDate]);
+    List<SavingTransaction> amounts = res.isNotEmpty
+        ? res.map((e) => SavingTransaction.fromMap(e)).toList()
+        : [];
+
+    double amount = 0;
+    for (var i = 0; i < amounts.length; i++) {
+      amount = amount + amounts[i].paymentamount;
+    }
+    return amount;
+  }
+
+  Future<List<SavingTransaction>> getMonthSavingTransList(
+      int card, DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String startDate = strYear + "-" + strMonth + "-01";
+    String endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM savingstransactions WHERE paymentaccount = ? AND paymentdate >= ? AND paymentdate <= ?
+    ''', [card, startDate, endDate]);
+    List<SavingTransaction> amounts = res.isNotEmpty
+        ? res.map((e) => SavingTransaction.fromMap(e)).toList()
+        : [];
+    return amounts;
+  }
+
+  //Bankcard Budgets
+  newBudget(Budget budget) async {
+    final db = await database;
+    var res = await db.rawInsert('''
+      INSERT INTO cardbudgets (
+        bankcard, month, need, want, save, foodamount, sociallifeamount, selfdevamount, cultureamount, householdamount, apperalamount, beautyamount, healthamount, educationamount, giftamount, techamount
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', [
+      budget.bankcard,
+      budget.month,
+      budget.need,
+      budget.want,
+      budget.save,
+      budget.foodamount,
+      budget.sociallifeamount,
+      budget.selfdevamount,
+      budget.cultureamount,
+      budget.householdamount,
+      budget.apperalamount,
+      budget.beautyamount,
+      budget.healthamount,
+      budget.educationamount,
+      budget.giftamount,
+      budget.techamount
+    ]);
+
+    return res;
+  }
+
+  getBudget(int card) async {
+    String currMonth =
+        DateTime(DateTime.now().year, DateTime.now().month).toIso8601String();
+
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM cardbudgets WHERE `bankcard` >= ? and `month` == ?
+    ''', [card, currMonth]);
+    return res.isNotEmpty ? Budget.fromMap(res.first) : Null;
+  }
+
+  getMonthBudget(int card, DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String startDate = strYear + "-" + strMonth + "-01";
+    String endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM cardbudgets WHERE bankcard = ? AND month >= ? AND month <= ?
+    ''', [card, startDate, endDate]);
+    return res.isNotEmpty ? Budget.fromMap(res.first) : Null;
+  }
+
+  updateBudget(Budget budget, int oldBudgetId) async {
+    final db = await database;
+    var res = await db.update("cardbudgets", budget.toMap(),
+        where: "id = ?", whereArgs: [oldBudgetId]);
+    return res;
+  }
+
   //Categories
   Future<List<Category>> getIncomeCategories() async {
     final db = await database;
@@ -821,6 +1423,296 @@ class DBProvider {
       totalAmount = totalAmount + bankcardslist[i].amount;
     }
     return totalAmount;
+  }
+
+  getFirstTransactionforCard(int card) async {
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM intrans WHERE bankcard = ? ORDER BY date ASC Limit 1
+    ''', [card]);
+
+    var res2 = await db.rawQuery('''
+      SELECT * FROM extrans WHERE bankcard = ? ORDER BY date ASC Limit 1
+    ''', [card]);
+
+    dynamic firstres = res.isNotEmpty
+        ? DateTime.parse(IncomeTransaction.fromMap(res.first).date)
+        : Null;
+
+    dynamic secondres = res2.isNotEmpty
+        ? DateTime.parse(ExpenseTransaction.fromMap(res2.first).date)
+        : Null;
+
+    if (firstres == Null && secondres != Null) return secondres;
+    if (firstres != Null && secondres == Null) return firstres;
+
+    if (firstres != Null && secondres != Null) {
+      DateTime a = firstres as DateTime;
+      DateTime b = secondres as DateTime;
+      if (a.isBefore(b)) {
+        return a;
+      } else {
+        return b;
+      }
+    } else {
+      return DateTime(DateTime.now().year, DateTime.now().month);
+    }
+  }
+
+  getCardPieData(int card, DateTime givenmonth) async {
+    double income;
+    double expense;
+    double saving;
+    getMonthIncome(card, givenmonth).then((value) => income = value);
+    getMonthExpense(card, givenmonth).then((value) => expense = value);
+    getMonthSavingTrans(card, givenmonth).then((value) => saving = value);
+    return [income, expense, saving, income + expense + saving];
+  }
+
+  getLineGraphIncomeData(int card, DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String w1startDate = strYear + "-" + strMonth + "-01";
+    String w1endDate = strYear + "-" + strMonth + "-07";
+
+    String w2startDate = strYear + "-" + strMonth + "-08";
+    String w2endDate = strYear + "-" + strMonth + "-14";
+
+    String w3startDate = strYear + "-" + strMonth + "-15";
+    String w3endDate = strYear + "-" + strMonth + "-21";
+
+    String w4startDate = strYear + "-" + strMonth + "-22";
+    String w4endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var w1res = await db.rawQuery('''
+      SELECT * FROM intrans WHERE bankcard = ? AND date >= ? AND date <= ?
+    ''', [card, w1startDate, w1endDate]);
+
+    var w2res = await db.rawQuery('''
+    SELECT * FROM intrans WHERE bankcard = ? AND date >= ? AND date <= ?
+  ''', [card, w2startDate, w2endDate]);
+
+    var w3res = await db.rawQuery('''
+    SELECT * FROM intrans WHERE bankcard = ? AND date >= ? AND date <= ?
+  ''', [card, w3startDate, w3endDate]);
+
+    var w4res = await db.rawQuery('''
+    SELECT * FROM intrans WHERE bankcard = ? AND date >= ? AND date <= ?
+  ''', [card, w4startDate, w4endDate]);
+
+    List<IncomeTransaction> w1 = w1res.isNotEmpty
+        ? w1res.map((e) => IncomeTransaction.fromMap(e)).toList()
+        : [];
+
+    List<IncomeTransaction> w2 = w2res.isNotEmpty
+        ? w2res.map((e) => IncomeTransaction.fromMap(e)).toList()
+        : [];
+
+    List<IncomeTransaction> w3 = w3res.isNotEmpty
+        ? w3res.map((e) => IncomeTransaction.fromMap(e)).toList()
+        : [];
+
+    List<IncomeTransaction> w4 = w4res.isNotEmpty
+        ? w4res.map((e) => IncomeTransaction.fromMap(e)).toList()
+        : [];
+
+    double w1avg = 0;
+    double w2avg = 0;
+    double w3avg = 0;
+    double w4avg = 0;
+
+    if (w1.length != 0) {
+      w1avg = avg(w1);
+    }
+    if (w2.length != 0) {
+      w2avg = avg(w2);
+    }
+    if (w3.length != 0) {
+      w3avg = avg(w3);
+    }
+    if (w4.length != 0) {
+      w4avg = avg(w4);
+    }
+
+    return [w1avg, w2avg, w3avg, w4avg];
+  }
+
+  getLineGraphExpenseData(int card, DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String w1startDate = strYear + "-" + strMonth + "-01";
+    String w1endDate = strYear + "-" + strMonth + "-07";
+
+    String w2startDate = strYear + "-" + strMonth + "-08";
+    String w2endDate = strYear + "-" + strMonth + "-14";
+
+    String w3startDate = strYear + "-" + strMonth + "-15";
+    String w3endDate = strYear + "-" + strMonth + "-21";
+
+    String w4startDate = strYear + "-" + strMonth + "-22";
+    String w4endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var w1res = await db.rawQuery('''
+      SELECT * FROM extrans WHERE bankcard = ? AND date >= ? AND date <= ?
+    ''', [card, w1startDate, w1endDate]);
+
+    var w2res = await db.rawQuery('''
+    SELECT * FROM extrans WHERE bankcard = ? AND date >= ? AND date <= ?
+  ''', [card, w2startDate, w2endDate]);
+
+    var w3res = await db.rawQuery('''
+    SELECT * FROM extrans WHERE bankcard = ? AND date >= ? AND date <= ?
+  ''', [card, w3startDate, w3endDate]);
+
+    var w4res = await db.rawQuery('''
+    SELECT * FROM extrans WHERE bankcard = ? AND date >= ? AND date <= ?
+  ''', [card, w4startDate, w4endDate]);
+
+    List<ExpenseTransaction> w1 = w1res.isNotEmpty
+        ? w1res.map((e) => ExpenseTransaction.fromMap(e)).toList()
+        : [];
+
+    List<ExpenseTransaction> w2 = w2res.isNotEmpty
+        ? w2res.map((e) => ExpenseTransaction.fromMap(e)).toList()
+        : [];
+
+    List<ExpenseTransaction> w3 = w3res.isNotEmpty
+        ? w3res.map((e) => ExpenseTransaction.fromMap(e)).toList()
+        : [];
+
+    List<ExpenseTransaction> w4 = w4res.isNotEmpty
+        ? w4res.map((e) => ExpenseTransaction.fromMap(e)).toList()
+        : [];
+
+    double w1avg = 0;
+    double w2avg = 0;
+    double w3avg = 0;
+    double w4avg = 0;
+
+    if (w1.length != 0) {
+      w1avg = avg(w1);
+    }
+    if (w2.length != 0) {
+      w2avg = avg(w2);
+    }
+    if (w3.length != 0) {
+      w3avg = avg(w3);
+    }
+    if (w4.length != 0) {
+      w4avg = avg(w4);
+    }
+
+    return [w1avg, w2avg, w3avg, w4avg];
+  }
+
+  getLineGraphSavingsData(int card, DateTime givenmonth) async {
+    int month = givenmonth.month;
+    int year = givenmonth.year;
+
+    bool leap = leapYear(year);
+    String strMonth;
+    int endday = endDayCalc(leap);
+
+    String strYear = DateTime.now().year.toString();
+
+    if (month < 10) {
+      strMonth = '0' + month.toString();
+    } else {
+      strMonth = month.toString();
+    }
+
+    String w1startDate = strYear + "-" + strMonth + "-01";
+    String w1endDate = strYear + "-" + strMonth + "-07";
+
+    String w2startDate = strYear + "-" + strMonth + "-08";
+    String w2endDate = strYear + "-" + strMonth + "-14";
+
+    String w3startDate = strYear + "-" + strMonth + "-15";
+    String w3endDate = strYear + "-" + strMonth + "-21";
+
+    String w4startDate = strYear + "-" + strMonth + "-22";
+    String w4endDate = strYear + "-" + strMonth + "-" + endday.toString();
+
+    final db = await database;
+    var w1res = await db.rawQuery('''
+      SELECT * FROM savingstransactions WHERE paymentaccount = ? AND paymentdate >= ? AND paymentdate <= ?
+    ''', [card, w1startDate, w1endDate]);
+
+    var w2res = await db.rawQuery('''
+    SELECT * FROM savingstransactions WHERE paymentaccount = ? AND paymentdate >= ? AND paymentdate <= ?
+  ''', [card, w2startDate, w2endDate]);
+
+    var w3res = await db.rawQuery('''
+    SELECT * FROM savingstransactions WHERE paymentaccount = ? AND paymentdate >= ? AND paymentdate <= ?
+  ''', [card, w3startDate, w3endDate]);
+
+    var w4res = await db.rawQuery('''
+    SELECT * FROM savingstransactions WHERE paymentaccount = ? AND paymentdate >= ? AND paymentdate <= ?
+  ''', [card, w4startDate, w4endDate]);
+
+    List<SavingTransaction> w1 = w1res.isNotEmpty
+        ? w1res.map((e) => SavingTransaction.fromMap(e)).toList()
+        : [];
+
+    List<SavingTransaction> w2 = w2res.isNotEmpty
+        ? w2res.map((e) => SavingTransaction.fromMap(e)).toList()
+        : [];
+
+    List<SavingTransaction> w3 = w3res.isNotEmpty
+        ? w3res.map((e) => SavingTransaction.fromMap(e)).toList()
+        : [];
+
+    List<SavingTransaction> w4 = w4res.isNotEmpty
+        ? w4res.map((e) => SavingTransaction.fromMap(e)).toList()
+        : [];
+
+    double w1avg = 0;
+    double w2avg = 0;
+    double w3avg = 0;
+    double w4avg = 0;
+
+    if (w1.length != 0) {
+      w1avg = savingAvg(w1);
+    }
+    if (w2.length != 0) {
+      w2avg = savingAvg(w2);
+    }
+    if (w3.length != 0) {
+      w3avg = savingAvg(w3);
+    }
+    if (w4.length != 0) {
+      w4avg = savingAvg(w4);
+    }
+
+    return [w1avg, w2avg, w3avg, w4avg];
   }
 
   //Utils
@@ -859,11 +1751,30 @@ class DBProvider {
     } else {
       if (month == 2 && leap) {
         endday = 29;
-      } else {
+      }
+      if (month == 2 && !leap) {
         endday = 28;
       }
     }
 
     return endday;
+  }
+
+  double avg(list) {
+    double avg = 0;
+    for (int i = 0; i < list.length; i++) {
+      avg = avg + list[i].amount;
+    }
+    avg = avg / list.length;
+    return avg;
+  }
+
+  double savingAvg(list) {
+    double avg = 0;
+    for (int i = 0; i < list.length; i++) {
+      avg = avg + list[i].paymentamount;
+    }
+    avg = avg / list.length;
+    return avg;
   }
 }

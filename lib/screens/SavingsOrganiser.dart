@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:money_tree/models/SavingsModel.dart';
 import 'package:money_tree/screens/add_saving_goal.dart';
 import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Preferences.dart';
 import 'package:page_transition/page_transition.dart';
 
 import 'HomeLayout.dart';
@@ -16,9 +17,11 @@ class SavingsOrganiser extends StatefulWidget {
 
 class _SavingsOrganiserState extends State<SavingsOrganiser> {
   List<Saving> slist = List<Saving>();
+  String currency = "";
 
   @override
   void initState() {
+    getCurrency().then((value) => currency = value);
     DBProvider.db.getSavings().then((value) {
       setState(() {
         slist = value;
@@ -171,7 +174,7 @@ class _SavingsOrganiserState extends State<SavingsOrganiser> {
                         Row(
                           children: <Widget>[
                             Text(
-                                "£" +
+                                currency +
                                     FlutterMoneyFormatter(amount: s.totalAmount)
                                         .output
                                         .nonSymbol,

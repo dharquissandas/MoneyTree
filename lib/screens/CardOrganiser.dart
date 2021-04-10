@@ -6,6 +6,7 @@ import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/screens/HomeLayout.dart';
 import 'package:money_tree/screens/add_bankcard.dart';
 import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Preferences.dart';
 import 'package:page_transition/page_transition.dart';
 
 class CardOrganiser extends StatefulWidget {
@@ -15,9 +16,11 @@ class CardOrganiser extends StatefulWidget {
 
 class _CardOrganiserState extends State<CardOrganiser> {
   List<BankCard> bclist = List<BankCard>();
+  String currency = "";
 
   @override
   void initState() {
+    getCurrency().then((value) => currency = value);
     DBProvider.db.getBankCards().then((value) {
       setState(() {
         bclist = value;
@@ -172,7 +175,7 @@ class _CardOrganiserState extends State<CardOrganiser> {
                         Row(
                           children: <Widget>[
                             Text(
-                                "£" +
+                                currency +
                                     FlutterMoneyFormatter(amount: bc.amount)
                                         .output
                                         .nonSymbol,

@@ -115,6 +115,7 @@ class _TransInputState extends State<TransInput> {
                   category: expensecategory,
                   date: expensedate,
                   amount: expenseamount,
+                  need: boolcheck(need),
                   bankCard: expensebankcard,
                   reoccur: boolcheck(expensereoccur));
 
@@ -126,6 +127,7 @@ class _TransInputState extends State<TransInput> {
                   category: expensecategory,
                   date: expensedate,
                   amount: expenseamount,
+                  need: boolcheck(need),
                   bankCard: expensebankcard,
                   reoccur: boolcheck(expensereoccur));
 

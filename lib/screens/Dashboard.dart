@@ -5,10 +5,12 @@ import 'package:date_format/date_format.dart';
 import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/models/ExpenseTransactionModel.dart';
 import 'package:money_tree/models/IncomeTransactionModel.dart';
+import 'package:money_tree/screens/BudgetLayout.dart';
 import 'package:money_tree/screens/TransInputLayout.dart';
 import 'package:money_tree/screens/add_bankcard.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:money_tree/utils/Preferences.dart';
 
 class Dashboard extends StatefulWidget {
   @override
@@ -16,29 +18,17 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  String currency = "";
+
+  @override
+  void initState() {
+    getCurrency().then((value) => currency = value);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //     backgroundColor: Colors.white,
-      //     centerTitle: true,
-      //     actions: [
-      //       IconButton(
-      //           icon: Icon(Icons.add),
-      //           color: Colors.black,
-      //           onPressed: () {
-      //             Navigator.push(
-      //                 context,
-      //                 PageTransition(
-      //                     type: PageTransitionType.rightToLeft,
-      //                     child: AddBankCard()));
-      //           })
-      //     ],
-      //     title: Text(
-      //       "Dashboard",
-      //       style: TextStyle(color: Colors.black),
-      //     )),
-
       //Main Container
       body: Container(
         child: ListView(
@@ -90,155 +80,178 @@ class _DashboardState extends State<Dashboard> {
                         child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             physics: BouncingScrollPhysics(),
-                            padding: EdgeInsets.only(left: 16, right: 6),
+                            padding: EdgeInsets.only(left: 16, right: 10),
                             itemCount: snapshot.data.length,
                             itemBuilder: (context, index) {
                               BankCard bc = snapshot.data[index];
-                              return Container(
-                                  margin: EdgeInsets.only(right: 10, bottom: 8),
-                                  height: 199,
-                                  width: 344,
-                                  decoration: BoxDecoration(
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.3),
-                                        blurRadius: 5,
-                                        spreadRadius: 1,
-                                        offset: Offset(0, 2.0),
-                                      )
-                                    ],
+                              return Row(
+                                children: [
+                                  InkWell(
                                     borderRadius: BorderRadius.circular(20),
-                                    color: Color(0xFFFF80A4),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        PageTransition(
+                                          type: PageTransitionType.rightToLeft,
+                                          child: BudgetLayout(
+                                            card: snapshot.data[index],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Ink(
+                                        height: 199,
+                                        width: 344,
+                                        decoration: BoxDecoration(
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.black.withOpacity(0.3),
+                                              blurRadius: 5,
+                                              spreadRadius: 1,
+                                              offset: Offset(0, 2.0),
+                                            )
+                                          ],
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          color: Color(0xFFFF80A4),
+                                        ),
+                                        child: Stack(
+                                          children: <Widget>[
+                                            Positioned(
+                                              top: -60,
+                                              right: 229,
+                                              child: Container(
+                                                height: 100,
+                                                width: 100,
+                                                decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: Color(0xFF1B239F)),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              bottom: -100,
+                                              right: 15,
+                                              child: Container(
+                                                height: 180,
+                                                width: 180,
+                                                decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: Color(0xFF1B239F)),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              left: 20,
+                                              top: 78,
+                                              child: Text(
+                                                "CARD NUMBER",
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              left: 20,
+                                              top: 98,
+                                              child: Text(
+                                                "**** **** **** " +
+                                                    bc.cardNumber.toString(),
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                            Positioned(
+                                                right: 10,
+                                                top: 15,
+                                                child: Image.asset(
+                                                  "assets/images/Mastercard.png",
+                                                  width: 40,
+                                                  height: 40,
+                                                )),
+                                            Positioned(
+                                              left: 20,
+                                              bottom: 45,
+                                              child: Text(
+                                                "CARDHOLDER NAME",
+                                                style: GoogleFonts.inter(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              left: 20,
+                                              top: 15,
+                                              child: Text(
+                                                "CARD BALANCE",
+                                                style: GoogleFonts.inter(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              left: 20,
+                                              top: 35,
+                                              child: Text(
+                                                currency +
+                                                    FlutterMoneyFormatter(
+                                                            amount: bc.amount)
+                                                        .output
+                                                        .nonSymbol,
+                                                style: GoogleFonts.inter(
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              left: 20,
+                                              bottom: 21,
+                                              child: Text(
+                                                bc.cardName,
+                                                style: GoogleFonts.inter(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              left: 225,
+                                              bottom: 45,
+                                              child: Text(
+                                                "EXPIRY DATE",
+                                                style: GoogleFonts.inter(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              left: 225,
+                                              bottom: 21,
+                                              child: Text(
+                                                bc.expiryDate,
+                                                style: GoogleFonts.inter(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                          ],
+                                        )),
                                   ),
-                                  child: Stack(
-                                    children: <Widget>[
-                                      Positioned(
-                                        top: -60,
-                                        right: 229,
-                                        child: Container(
-                                          height: 100,
-                                          width: 100,
-                                          decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Color(0xFF1B239F)),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        bottom: -100,
-                                        right: 15,
-                                        child: Container(
-                                          height: 180,
-                                          width: 180,
-                                          decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Color(0xFF1B239F)),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        left: 20,
-                                        top: 78,
-                                        child: Text(
-                                          "CARD NUMBER",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        left: 20,
-                                        top: 98,
-                                        child: Text(
-                                          "**** **** **** " +
-                                              bc.cardNumber.toString(),
-                                          style: GoogleFonts.inter(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w700,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                          right: 10,
-                                          top: 15,
-                                          child: Image.asset(
-                                            "assets/images/Mastercard.png",
-                                            width: 40,
-                                            height: 40,
-                                          )),
-                                      Positioned(
-                                        left: 20,
-                                        bottom: 45,
-                                        child: Text(
-                                          "CARDHOLDER NAME",
-                                          style: GoogleFonts.inter(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400,
-                                              color: Colors.white),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        left: 20,
-                                        top: 15,
-                                        child: Text(
-                                          "CARD BALANCE",
-                                          style: GoogleFonts.inter(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400,
-                                              color: Colors.white),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        left: 20,
-                                        top: 35,
-                                        child: Text(
-                                          "£" +
-                                              FlutterMoneyFormatter(
-                                                      amount: bc.amount)
-                                                  .output
-                                                  .nonSymbol,
-                                          style: GoogleFonts.inter(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w700,
-                                              color: Colors.white),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        left: 20,
-                                        bottom: 21,
-                                        child: Text(
-                                          bc.cardName,
-                                          style: GoogleFonts.inter(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w700,
-                                              color: Colors.white),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        left: 225,
-                                        bottom: 45,
-                                        child: Text(
-                                          "EXPIRY DATE",
-                                          style: GoogleFonts.inter(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400,
-                                              color: Colors.white),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        left: 225,
-                                        bottom: 21,
-                                        child: Text(
-                                          bc.expiryDate,
-                                          style: GoogleFonts.inter(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w700,
-                                              color: Colors.white),
-                                        ),
-                                      ),
-                                    ],
-                                  ));
+                                  SizedBox(
+                                    height: 215,
+                                    width: 10,
+                                  )
+                                ],
+                              );
                             }),
                       );
                     } else {
@@ -307,7 +320,7 @@ class _DashboardState extends State<Dashboard> {
                                 AsyncSnapshot<double> snapshot) {
                               if (snapshot.hasData) {
                                 return Text(
-                                    "£" +
+                                    currency +
                                         FlutterMoneyFormatter(
                                                 amount: snapshot.data)
                                             .output
@@ -342,7 +355,7 @@ class _DashboardState extends State<Dashboard> {
                                       AsyncSnapshot<double> snapshot) {
                                     if (snapshot.hasData) {
                                       return Text(
-                                          "£" +
+                                          currency +
                                               FlutterMoneyFormatter(
                                                       amount: snapshot.data)
                                                   .output
@@ -375,7 +388,7 @@ class _DashboardState extends State<Dashboard> {
                                       AsyncSnapshot<double> snapshot) {
                                     if (snapshot.hasData) {
                                       return Text(
-                                          "£" +
+                                          currency +
                                               FlutterMoneyFormatter(
                                                       amount: snapshot.data)
                                                   .output
@@ -407,7 +420,7 @@ class _DashboardState extends State<Dashboard> {
                                       AsyncSnapshot<double> snapshot) {
                                     if (snapshot.hasData) {
                                       return Text(
-                                          "£" +
+                                          currency +
                                               FlutterMoneyFormatter(
                                                       amount: snapshot.data)
                                                   .output
@@ -560,7 +573,7 @@ class _DashboardState extends State<Dashboard> {
                                   Row(
                                     children: <Widget>[
                                       Text(
-                                        "£" +
+                                        currency +
                                             FlutterMoneyFormatter(
                                                     amount: it.amount)
                                                 .output
@@ -708,7 +721,7 @@ class _DashboardState extends State<Dashboard> {
                                   Row(
                                     children: <Widget>[
                                       Text(
-                                        "£" +
+                                        currency +
                                             FlutterMoneyFormatter(
                                                     amount: et.amount)
                                                 .output

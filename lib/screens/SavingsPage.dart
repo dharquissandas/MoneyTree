@@ -4,6 +4,7 @@ import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:money_tree/models/SavingsTransactionModel.dart';
 import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Preferences.dart';
 import 'package:page_transition/page_transition.dart';
 
 import 'TransInputLayout.dart';
@@ -16,6 +17,14 @@ class SavingsPage extends StatefulWidget {
 }
 
 class _SavingsPageState extends State<SavingsPage> {
+  String currency = "";
+
+  @override
+  void initState() {
+    getCurrency().then((value) => currency = value);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,7 +115,7 @@ class _SavingsPageState extends State<SavingsPage> {
                               Row(
                                 children: <Widget>[
                                   Text(
-                                    "£" +
+                                    currency +
                                         FlutterMoneyFormatter(
                                                 amount: st.paymentamount)
                                             .output

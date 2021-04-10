@@ -5,6 +5,7 @@ import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/models/CategoryModel.dart';
 import 'package:money_tree/models/IncomeTransactionModel.dart';
 import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Preferences.dart';
 
 int incomeid = -1;
 String incomename;
@@ -33,6 +34,11 @@ class _AddIncomeState extends State<AddIncome> {
   @override
   void initState() {
     super.initState();
+    getCurrency().then((value) {
+      currencycontroller = CurrencyTextFieldController(
+          rightSymbol: value, decimalSymbol: ".", thousandSymbol: ",");
+      setState(() {});
+    });
     if (widget.transaction != null) {
       incomeid = widget.transaction.id;
       incomename = widget.transaction.name;
@@ -236,7 +242,6 @@ class _AddIncomeState extends State<AddIncome> {
               buildCategory(),
               buildDate(),
               buildAmount(),
-              buildReoccur(),
             ],
           ),
         ),

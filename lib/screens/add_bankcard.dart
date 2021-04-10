@@ -7,6 +7,7 @@ import 'package:money_tree/utils/Database.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:flutter/services.dart';
 import 'package:card_scanner/card_scanner.dart';
+import 'package:money_tree/utils/Preferences.dart';
 
 class AddBankCard extends StatefulWidget {
   final BankCard bc;
@@ -26,7 +27,22 @@ class _AddBankCardState extends State<AddBankCard> {
 
   CardDetails card;
 
+  String currency = "\$";
+
   String capitalise(String s) => s[0].toUpperCase() + s.substring(1);
+
+  String dateStringConversion(String s) {
+    return "20" + s.substring(3, 5) + "-" + s.substring(0, 2) + "-01";
+  }
+
+  var controller = CurrencyTextFieldController(
+      rightSymbol: "£", decimalSymbol: ".", thousandSymbol: ",");
+
+  final GlobalKey<FormState> formkey = GlobalKey<FormState>();
+
+  TextEditingController _date = new TextEditingController();
+  TextEditingController cardnamecontroller = new TextEditingController();
+  TextEditingController cardnumbercontroller = new TextEditingController();
 
   Future<void> scanCard() async {
     var cd = await CardScanner.scanCard(
@@ -36,27 +52,36 @@ class _AddBankCardState extends State<AddBankCard> {
       ),
     );
 
-    if (!mounted) return;
-    setState(() {
-      card = cd;
-      cardNumber = int.parse(card.cardNumber.toString().substring(11, 15));
-      cardnumbercontroller.text = card.cardNumber.toString().substring(11, 15);
+    if (!mounted) {
+      return;
+    } else {
+      setState(() {
+        card = cd;
+        cardNumber = int.parse(card.cardNumber.toString().substring(12, 16));
+        cardnumbercontroller.text =
+            card.cardNumber.toString().substring(12, 16);
 
-      cardName = card.cardHolderName;
-      cardnamecontroller.text = card.cardHolderName;
+        cardName = card.cardHolderName;
+        cardnamecontroller.text = card.cardHolderName;
 
-      expiryDate = card.expiryDate;
-      _date.text = card.expiryDate;
+        expiryDate = dateStringConversion(card.expiryDate);
+        _date.text = dateStringConversion(card.expiryDate);
 
-      if (card.cardIssuer.substring(11) != "unknown") {
-        cardType = capitalise(card.cardIssuer.substring(11));
-        selectedCard = capitalise(card.cardIssuer.substring(11));
-      }
-    });
+        if (card.cardIssuer.substring(11) != "unknown") {
+          cardType = capitalise(card.cardIssuer.substring(11));
+          selectedCard = capitalise(card.cardIssuer.substring(11));
+        }
+      });
+    }
   }
 
   @override
   void initState() {
+    getCurrency().then((value) {
+      controller = CurrencyTextFieldController(
+          rightSymbol: value, decimalSymbol: ".", thousandSymbol: ",");
+    });
+
     if (widget.bc != null) {
       id = widget.bc.id;
 
@@ -87,15 +112,6 @@ class _AddBankCardState extends State<AddBankCard> {
     }
     super.initState();
   }
-
-  final GlobalKey<FormState> formkey = GlobalKey<FormState>();
-
-  TextEditingController _date = new TextEditingController();
-  TextEditingController cardnamecontroller = new TextEditingController();
-  TextEditingController cardnumbercontroller = new TextEditingController();
-
-  var controller = CurrencyTextFieldController(
-      rightSymbol: "£", decimalSymbol: ".", thousandSymbol: ",");
 
   Future<Null> _buildDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(

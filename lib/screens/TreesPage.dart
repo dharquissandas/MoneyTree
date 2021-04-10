@@ -1,4 +1,3 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +6,7 @@ import 'package:money_tree/models/SavingsModel.dart';
 import 'package:money_tree/screens/SavingsLayout.dart';
 import 'package:money_tree/screens/add_saving_goal.dart';
 import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Preferences.dart';
 import 'package:page_transition/page_transition.dart';
 
 class TreePage extends StatefulWidget {
@@ -15,6 +15,60 @@ class TreePage extends StatefulWidget {
 }
 
 class _TreePageState extends State<TreePage> {
+  String currency = "";
+  @override
+  void initState() {
+    getCurrency().then((value) => currency = value);
+    super.initState();
+  }
+
+  buildSavingsChecker() {
+    return Container(
+      height: 90,
+      margin: EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 5,
+              spreadRadius: 1,
+              offset: Offset(0, 2.0))
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                "Please Add A Saving",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(
+                  "Press the button on the top right of the page to create a Money Tree and display it here.",
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  )),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,7 +112,7 @@ class _TreePageState extends State<TreePage> {
                 future: DBProvider.db.getSavings(),
                 builder: (BuildContext context,
                     AsyncSnapshot<List<Saving>> snapshot) {
-                  if (snapshot.hasData) {
+                  if (snapshot.hasData && snapshot.data.isNotEmpty) {
                     return Container(
                       height: MediaQuery.of(context).size.height,
                       child: ListView.builder(
@@ -141,7 +195,7 @@ class _TreePageState extends State<TreePage> {
                                       right: 20,
                                       top: 150,
                                       child: Text(
-                                        "£" +
+                                        currency +
                                             FlutterMoneyFormatter(
                                                     amount: s.amountSaved)
                                                 .output
@@ -171,7 +225,7 @@ class _TreePageState extends State<TreePage> {
                                       right: 20,
                                       top: 90,
                                       child: Text(
-                                        "£" +
+                                        currency +
                                             FlutterMoneyFormatter(
                                                     amount: s.totalAmount)
                                                 .output
@@ -201,7 +255,7 @@ class _TreePageState extends State<TreePage> {
                                       right: 16,
                                       top: 210,
                                       child: Text(
-                                        "£" +
+                                        currency +
                                             FlutterMoneyFormatter(
                                                     amount: s.totalAmount -
                                                         s.amountSaved)
@@ -250,7 +304,7 @@ class _TreePageState extends State<TreePage> {
                       ),
                     );
                   } else {
-                    return Container();
+                    return buildSavingsChecker();
                   }
                 })
           ],

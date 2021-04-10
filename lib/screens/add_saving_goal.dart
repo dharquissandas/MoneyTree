@@ -6,6 +6,7 @@ import 'package:money_tree/models/SavingsModel.dart';
 import 'package:money_tree/screens/SavingsOrganiser.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:money_tree/utils/Preferences.dart';
 
 import 'HomeLayout.dart';
 
@@ -35,8 +36,21 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
 
   int paymentFrequency;
 
+  var totalAmountController = CurrencyTextFieldController(
+      rightSymbol: "£", decimalSymbol: ".", thousandSymbol: ",");
+
+  var payableController = CurrencyTextFieldController(
+      rightSymbol: "£", decimalSymbol: ".", thousandSymbol: ",");
+
   @override
   void initState() {
+    getCurrency().then((value) {
+      totalAmountController = CurrencyTextFieldController(
+          rightSymbol: value, decimalSymbol: ".", thousandSymbol: ",");
+      payableController = CurrencyTextFieldController(
+          rightSymbol: value, decimalSymbol: ".", thousandSymbol: ",");
+      setState(() {});
+    });
     if (widget.s != null) {
       id = widget.s.id;
       savingorder = widget.s.savingOrder;
@@ -70,12 +84,6 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
   TextEditingController _date = new TextEditingController();
   TextEditingController itemcontroller = new TextEditingController();
   TextEditingController descriptioncontroller = new TextEditingController();
-
-  var totalAmountController = CurrencyTextFieldController(
-      rightSymbol: "£", decimalSymbol: ".", thousandSymbol: ",");
-
-  var payableController = CurrencyTextFieldController(
-      rightSymbol: "£", decimalSymbol: ".", thousandSymbol: ",");
 
   List<DropdownMenuItem<int>> frequency = [];
   var selectedFrequency;

@@ -7,6 +7,7 @@ import 'package:money_tree/models/SavingsModel.dart';
 import 'package:money_tree/models/SavingsTransactionModel.dart';
 import 'package:money_tree/screens/add_saving.dart';
 import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Preferences.dart';
 
 class SavingsPlanner extends StatefulWidget {
   final Saving saving;
@@ -18,9 +19,11 @@ class SavingsPlanner extends StatefulWidget {
 class _SavingsPlannerState extends State<SavingsPlanner> {
   Saving s;
   List<SavingTransaction> transList = List<SavingTransaction>();
+  String currency = "";
 
   @override
   void initState() {
+    getCurrency().then((value) => currency = value);
     DBProvider.db.getSavingById(widget.saving.id).then((saving) {
       setState(() {
         s = saving;
@@ -222,15 +225,15 @@ class _SavingsPlannerState extends State<SavingsPlanner> {
                           int.parse(endDate.substring(5, 7)),
                           int.parse(endDate.substring(8, 10))),
                       [d, '/', m]))),
-              DataCell(Text("£" +
+              DataCell(Text(currency +
                   FlutterMoneyFormatter(amount: list[i].calculatedamount)
                       .output
                       .nonSymbol)),
-              DataCell(Text("£" +
+              DataCell(Text(currency +
                   FlutterMoneyFormatter(amount: list[i].amount)
                       .output
                       .nonSymbol)),
-              DataCell(Text("£" +
+              DataCell(Text(currency +
                   FlutterMoneyFormatter(amount: list[i].missed)
                       .output
                       .nonSymbol)),
@@ -307,7 +310,7 @@ class _SavingsPlannerState extends State<SavingsPlanner> {
                         left: 210,
                         top: 18,
                         child: Text(
-                          "£" +
+                          currency +
                               FlutterMoneyFormatter(amount: cs.feasiblePayment)
                                   .output
                                   .nonSymbol,

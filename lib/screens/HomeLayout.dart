@@ -7,6 +7,7 @@ import 'package:money_tree/screens/TreesPage.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:money_tree/screens/ExpensePage.dart';
 import 'package:money_tree/screens/IncomePage.dart';
+import 'package:money_tree/utils/Preferences.dart';
 import 'SavingsOrganiser.dart';
 
 class Home extends StatefulWidget {
@@ -50,7 +51,7 @@ class _HomeState extends State<Home> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              child: Text('Deep Harquissandas'),
+              child: Text('Money Tree'),
               decoration: BoxDecoration(
                 color: Colors.teal[300],
               ),
@@ -74,6 +75,55 @@ class _HomeState extends State<Home> {
                     PageTransition(
                         type: PageTransitionType.rightToLeft,
                         child: SavingsOrganiser()));
+              },
+            ),
+            ListTile(
+              title: Text('Currency Selector'),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => SimpleDialog(
+                    title: const Text('Select Currency'),
+                    children: <Widget>[
+                      SimpleDialogOption(
+                        onPressed: () {
+                          setCurrency("£");
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              PageTransition(
+                                  type: PageTransitionType.rightToLeft,
+                                  child: Home()),
+                              (r) => false);
+                        },
+                        child: const Text('Pounds (£)'),
+                      ),
+                      SimpleDialogOption(
+                        onPressed: () {
+                          setCurrency("\$");
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              PageTransition(
+                                  type: PageTransitionType.rightToLeft,
+                                  child: Home()),
+                              (r) => false);
+                        },
+                        child: const Text('Dollars (\$)'),
+                      ),
+                      SimpleDialogOption(
+                        onPressed: () {
+                          setCurrency("€");
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              PageTransition(
+                                  type: PageTransitionType.rightToLeft,
+                                  child: Home()),
+                              (r) => false);
+                        },
+                        child: const Text('Euros (€)'),
+                      ),
+                    ],
+                  ),
+                );
               },
             ),
           ],

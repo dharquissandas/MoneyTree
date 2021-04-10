@@ -7,6 +7,7 @@ import 'package:money_tree/models/SavingsModel.dart';
 import 'package:money_tree/models/SavingsTransactionModel.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:money_tree/utils/Preferences.dart';
 
 class SavingInfo extends StatefulWidget {
   final Saving saving;
@@ -18,6 +19,7 @@ class SavingInfo extends StatefulWidget {
 class _SavingInfoState extends State<SavingInfo> {
   List<SavingTransaction> tlist = List<SavingTransaction>();
   var largestpaidamount;
+  String currency = "";
 
   List<Color> gradientColors = [
     const Color(0xff23b6e6),
@@ -26,6 +28,7 @@ class _SavingInfoState extends State<SavingInfo> {
 
   @override
   void initState() {
+    getCurrency().then((value) => currency = value);
     setState(() {});
     var la;
 
@@ -124,7 +127,7 @@ class _SavingInfoState extends State<SavingInfo> {
                         right: 20,
                         top: 150,
                         child: Text(
-                          "£" +
+                          currency +
                               FlutterMoneyFormatter(amount: s.amountSaved)
                                   .output
                                   .nonSymbol,
@@ -153,7 +156,7 @@ class _SavingInfoState extends State<SavingInfo> {
                         right: 20,
                         top: 90,
                         child: Text(
-                          "£" +
+                          currency +
                               FlutterMoneyFormatter(amount: s.totalAmount)
                                   .output
                                   .nonSymbol,
@@ -182,7 +185,7 @@ class _SavingInfoState extends State<SavingInfo> {
                         right: 16,
                         top: 210,
                         child: Text(
-                          "£" +
+                          currency +
                               FlutterMoneyFormatter(
                                       amount: s.totalAmount - s.amountSaved)
                                   .output
@@ -394,7 +397,7 @@ class _SavingInfoState extends State<SavingInfo> {
             getTitles: (value) {
               for (var i = 0; i <= 10; i++) {
                 if (value == 0) {
-                  return "£" +
+                  return currency +
                       FlutterMoneyFormatter(amount: 0.00).output.nonSymbol;
                 }
                 if (value > 0 && value == i) {
@@ -459,7 +462,8 @@ class _SavingInfoState extends State<SavingInfo> {
                 int rodIndex,
               ) {
                 return BarTooltipItem(
-                  "£" + FlutterMoneyFormatter(amount: rod.y).output.nonSymbol,
+                  currency +
+                      FlutterMoneyFormatter(amount: rod.y).output.nonSymbol,
                   //rod.y.round().toString(),
                   TextStyle(
                     color: Colors.black,

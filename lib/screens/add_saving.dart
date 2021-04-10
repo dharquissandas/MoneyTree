@@ -5,6 +5,7 @@ import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/models/SavingsModel.dart';
 import 'package:money_tree/models/SavingsTransactionModel.dart';
 import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Preferences.dart';
 
 int savingid = -1;
 int paymentaccount;
@@ -34,6 +35,11 @@ class _AddSavingState extends State<AddSaving> {
 
   @override
   void initState() {
+    getCurrency().then((value) {
+      controller = CurrencyTextFieldController(
+          rightSymbol: value, decimalSymbol: ".", thousandSymbol: ",");
+      setState(() {});
+    });
     if (widget.transaction != null) {
       savingid = widget.transaction.id;
       paymentaccount = widget.transaction.paymentaccount;
@@ -88,7 +94,7 @@ class _AddSavingState extends State<AddSaving> {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(1901, 1),
-      lastDate: DateTime(2025, 1),
+      lastDate: DateTime.now(),
     );
 
     if (picked != null) {
@@ -255,7 +261,6 @@ class _AddSavingState extends State<AddSaving> {
               buildCardCategory(),
               buildDate(),
               buildSavingAmount(),
-              buildReoccur()
             ],
           ),
         ),

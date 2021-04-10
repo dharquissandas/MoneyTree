@@ -5,6 +5,7 @@ import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/models/CategoryModel.dart';
 import 'package:money_tree/models/ExpenseTransactionModel.dart';
 import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Preferences.dart';
 
 GlobalKey<FormState> expenseformkey = GlobalKey<FormState>();
 
@@ -16,6 +17,8 @@ int expensebankcard;
 double expenseamount;
 bool expensereoccur = false;
 BankCard selectedExpenseCard;
+bool need = true;
+bool want = false;
 
 class AddExpense extends StatefulWidget {
   final ExpenseTransaction transaction;
@@ -32,6 +35,12 @@ class _AddExpenseState extends State<AddExpense> {
 
   @override
   void initState() {
+    getCurrency().then((value) {
+      currencycontroller = CurrencyTextFieldController(
+          rightSymbol: value, decimalSymbol: ".", thousandSymbol: ",");
+      setState(() {});
+    });
+
     super.initState();
     if (widget.transaction != null) {
       expenseid = widget.transaction.id;
@@ -40,6 +49,10 @@ class _AddExpenseState extends State<AddExpense> {
 
       expensedate = widget.transaction.date;
       _date.text = widget.transaction.date;
+
+      DBProvider.db
+          .getBankCardById(widget.transaction.bankCard)
+          .then((value) => selectedExpenseCard = value);
 
       expensebankcard = widget.transaction.bankCard;
       expensecategory = widget.transaction.category;
@@ -50,11 +63,15 @@ class _AddExpenseState extends State<AddExpense> {
               .output
               .nonSymbol;
 
+      need = widget.transaction.need == 1 ? true : false;
+      want = widget.transaction.need == 0 ? true : false;
       expensereoccur = widget.transaction.reoccur == 0 ? false : true;
     } else {
       setState(() {
         expensebankcard = null;
         expensecategory = null;
+        need = true;
+        want = false;
         expenseid = -1;
         _date.value =
             TextEditingValue(text: DateTime.now().toString().substring(0, 10));
@@ -212,6 +229,39 @@ class _AddExpenseState extends State<AddExpense> {
     );
   }
 
+  Widget buildNeedChoice() {
+    return Column(
+      children: [
+        CheckboxListTile(
+          value: need,
+          onChanged: (value) {
+            setState(() {
+              if (value) {
+                need = true;
+                want = false;
+              }
+            });
+          },
+          title: new Text("Need"),
+          controlAffinity: ListTileControlAffinity.leading,
+        ),
+        CheckboxListTile(
+          value: want,
+          onChanged: (value) {
+            setState(() {
+              if (value) {
+                want = true;
+                need = false;
+              }
+            });
+          },
+          title: new Text("Want"),
+          controlAffinity: ListTileControlAffinity.leading,
+        )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -230,14 +280,15 @@ class _AddExpenseState extends State<AddExpense> {
         padding: EdgeInsets.only(left: 16, right: 16),
         child: Form(
           key: expenseformkey,
-          child: Column(
+          child: ListView(
+            physics: BouncingScrollPhysics(),
             children: <Widget>[
               buildName(),
               buildCardCategory(),
               buildCategory(),
               buildDate(),
               buildAmount(),
-              buildReoccur(),
+              buildNeedChoice(),
             ],
           ),
         ),

@@ -18,6 +18,7 @@ class ExpenseTransaction {
   double amount;
   int bankCard;
   int reoccur;
+  int need;
 
   ExpenseTransaction({
     this.id,
@@ -26,6 +27,7 @@ class ExpenseTransaction {
     this.category,
     this.amount,
     this.bankCard,
+    this.need,
     this.reoccur,
   });
 
@@ -37,6 +39,7 @@ class ExpenseTransaction {
         category: json["category"],
         amount: json["amount"].toDouble(),
         bankCard: json["bankcard"],
+        need: json["need"],
         reoccur: json["reoccur"],
       );
 
@@ -47,6 +50,7 @@ class ExpenseTransaction {
         "category": category,
         "amount": amount,
         "bankcard": bankCard,
+        "need": need,
         "reoccur": reoccur,
       };
 }

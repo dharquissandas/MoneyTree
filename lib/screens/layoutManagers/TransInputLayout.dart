@@ -8,7 +8,7 @@ import 'package:money_tree/screens/forms/add_expense.dart';
 import 'package:money_tree/screens/forms/add_income.dart';
 import 'package:money_tree/screens/forms/add_saving.dart';
 import 'package:money_tree/screens/layoutManagers/HomeLayout.dart';
-import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Database/Database.dart';
 import 'package:page_transition/page_transition.dart';
 
 class TransInput extends StatefulWidget {

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:money_tree/models/SavingsTransactionModel.dart';
-import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Database/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
 import 'package:page_transition/page_transition.dart';
 

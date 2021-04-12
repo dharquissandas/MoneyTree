@@ -6,7 +6,7 @@ import 'package:money_tree/components/backgroundCard.dart';
 import 'package:money_tree/components/heading.dart';
 import 'package:money_tree/models/CalculatedSavingsModel.dart';
 import 'package:money_tree/models/SavingsModel.dart';
-import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Database/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
 
 class SavingsPlanner extends StatefulWidget {

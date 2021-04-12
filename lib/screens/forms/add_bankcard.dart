@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/screens/preferences/CardOrganiser.dart';
 import 'package:money_tree/screens/layoutManagers/HomeLayout.dart';
-import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Database/Database.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:flutter/services.dart';
 import 'package:card_scanner/card_scanner.dart';

@@ -8,7 +8,7 @@ import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/models/BudgetModel.dart';
 import 'package:money_tree/models/CategoryModel.dart';
 import 'package:money_tree/screens/layoutManagers/HomeLayout.dart';
-import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Database/Database.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:money_tree/utils/Preferences.dart';
 

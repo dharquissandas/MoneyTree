@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/screens/layoutManagers/HomeLayout.dart';
 import 'package:money_tree/screens/forms/add_bankcard.dart';
-import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Database/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
 import 'package:page_transition/page_transition.dart';
 

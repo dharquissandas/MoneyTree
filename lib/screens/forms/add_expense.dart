@@ -4,7 +4,7 @@ import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/models/CategoryModel.dart';
 import 'package:money_tree/models/ExpenseTransactionModel.dart';
-import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Database/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
 
 GlobalKey<FormState> expenseformkey = GlobalKey<FormState>();

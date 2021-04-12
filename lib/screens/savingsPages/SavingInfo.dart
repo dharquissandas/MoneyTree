@@ -5,7 +5,7 @@ import 'package:money_tree/components/heading.dart';
 import 'package:money_tree/components/savingsTreeCard.dart';
 import 'package:money_tree/models/SavingsModel.dart';
 import 'package:money_tree/models/SavingsTransactionModel.dart';
-import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Database/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
 
 class SavingInfo extends StatefulWidget {

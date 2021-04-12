@@ -4,7 +4,7 @@ import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/models/SavingsModel.dart';
 import 'package:money_tree/models/SavingsTransactionModel.dart';
-import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Database/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
 
 int savingid = -1;

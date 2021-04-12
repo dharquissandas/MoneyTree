@@ -4,7 +4,7 @@ import 'package:money_tree/models/CalculatedSavingsModel.dart';
 import 'package:money_tree/models/SavingsModel.dart';
 import 'package:money_tree/screens/layoutManagers/HomeLayout.dart';
 import 'package:money_tree/screens/preferences/SavingsOrganiser.dart';
-import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Database/Database.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:money_tree/utils/Preferences.dart';
 

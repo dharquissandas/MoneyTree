@@ -5,7 +5,7 @@ import 'package:money_tree/components/graphs/budgetWeeklyGraph.dart';
 import 'package:money_tree/components/heading.dart';
 import 'package:money_tree/components/overviewCard.dart';
 import 'package:money_tree/models/BankCardModel.dart';
-import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Database/Database.dart';
 import 'package:month_picker_strip/month_picker_strip.dart';
 import 'package:money_tree/utils/Preferences.dart';
 

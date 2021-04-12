@@ -11,7 +11,7 @@ import 'package:money_tree/models/IncomeTransactionModel.dart';
 import 'package:money_tree/screens/layoutManagers/BudgetLayout.dart';
 import 'package:money_tree/screens/layoutManagers/TransInputLayout.dart';
 import 'package:money_tree/screens/forms/add_bankcard.dart';
-import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Database/Database.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:money_tree/utils/Preferences.dart';
 

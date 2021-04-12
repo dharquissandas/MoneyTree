@@ -4,7 +4,7 @@ import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:money_tree/models/ExpenseTransactionModel.dart';
 import 'package:money_tree/screens/layoutManagers/TransInputLayout.dart';
-import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Database/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
 import 'package:month_picker_strip/month_picker_strip.dart';
 import 'package:page_transition/page_transition.dart';

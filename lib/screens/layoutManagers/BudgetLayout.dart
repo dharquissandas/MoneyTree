@@ -6,7 +6,7 @@ import 'package:money_tree/screens/budgetPages/BudgetPlanner.dart';
 import 'package:money_tree/screens/budgetPages/BudgetSavings.dart';
 import 'package:money_tree/screens/budgetPages/BudgetTransactions.dart';
 import 'package:money_tree/screens/forms/add_budget.dart';
-import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Database/Database.dart';
 import 'package:page_transition/page_transition.dart';
 
 class BudgetLayout extends StatefulWidget {

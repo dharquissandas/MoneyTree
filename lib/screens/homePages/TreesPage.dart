@@ -4,7 +4,7 @@ import 'package:money_tree/components/savingsTreeCard.dart';
 import 'package:money_tree/models/SavingsModel.dart';
 import 'package:money_tree/screens/forms/add_saving_goal.dart';
 import 'package:money_tree/screens/layoutManagers/SavingsLayout.dart';
-import 'package:money_tree/utils/Database.dart';
+import 'package:money_tree/utils/Database/Database.dart';
 import 'package:money_tree/utils/Messages.dart';
 import 'package:money_tree/utils/Preferences.dart';
 import 'package:page_transition/page_transition.dart';

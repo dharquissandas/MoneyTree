@@ -4,7 +4,7 @@ import 'package:money_tree/models/SavingsModel.dart';
 import 'package:money_tree/screens/savingsPages/SavingInfo.dart';
 import 'package:money_tree/screens/savingsPages/SavingPlanner.dart';
 import 'package:money_tree/screens/savingsPages/SavingsPage.dart';
-import 'package:money_tree/screens/forms/TransInputLayout.dart';
+import 'package:money_tree/screens/layoutManagers/TransInputLayout.dart';
 import 'package:page_transition/page_transition.dart';
 
 class SavingsLayout extends StatefulWidget {
@@ -23,12 +23,14 @@ class _SavingsLayoutState extends State<SavingsLayout> {
     super.initState();
   }
 
+  //Page Changer
   changePage(int index) {
     setState(() {
       pageIndex = index;
     });
   }
 
+  //Page Setter
   pageSetter() {
     if (widget.saving.calculated == 1) {
       if (pageIndex == 0) {
@@ -47,6 +49,7 @@ class _SavingsLayoutState extends State<SavingsLayout> {
     }
   }
 
+  //Build Bottom Bar Pages
   List<BubbleBottomBarItem> getNavigation() {
     if (widget.saving.calculated == 1) {
       return <BubbleBottomBarItem>[
@@ -117,6 +120,7 @@ class _SavingsLayoutState extends State<SavingsLayout> {
     }
   }
 
+  //Build Bottom Bar
   @override
   Widget build(BuildContext context) {
     return Scaffold(

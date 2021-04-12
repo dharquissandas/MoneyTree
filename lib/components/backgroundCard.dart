@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 
 class BackgroundCard extends StatelessWidget {
-  final int height;
+  final double height;
   final Widget child;
+  final bool clickable;
 
-  const BackgroundCard({Key key, this.height, this.child}) : super(key: key);
+  const BackgroundCard({Key key, this.height, this.clickable, this.child})
+      : super(key: key);
 
+// Display Generic White Card
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 100,
+        height: this.height,
         margin: EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 8),
         decoration: BoxDecoration(
           color: Colors.white,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+//Initialise Notifications
 notificationInit(
     FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
     InitializationSettings initializationSettings) async {
@@ -13,19 +14,21 @@ notificationInit(
   });
 }
 
+// Calculate Next Notification Time
 tz.TZDateTime _nextInstance(int time) {
   final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
   tz.TZDateTime scheduledDate =
-      tz.TZDateTime(tz.local, now.year, now.month, now.day, time - 1, 33);
+      tz.TZDateTime(tz.local, now.year, now.month, now.day, time - 1);
   if (scheduledDate.isBefore(now)) {
     scheduledDate = scheduledDate.add(const Duration(days: 1));
   }
   return scheduledDate;
 }
 
+//Turn On Daily Notifications
 scheduleRecorruingNotification(
     FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
-  final time = 17;
+  final time = 21;
   await flutterLocalNotificationsPlugin.zonedSchedule(
       0,
       'Money Tree Transactions',
@@ -43,6 +46,7 @@ scheduleRecorruingNotification(
       matchDateTimeComponents: DateTimeComponents.time);
 }
 
+//Turn Off Daily Notifications
 turnReoccuringNotificationOff(
     FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
   await flutterLocalNotificationsPlugin.cancel(0);

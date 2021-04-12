@@ -10,6 +10,7 @@ class RadialPainter extends CustomPainter {
 
   RadialPainter({this.bgColor, this.lineColor, this.width, this.percent});
 
+  //Build Radial
   @override
   void paint(Canvas canvas, Size size) {
     Paint bgLine = new Paint()

@@ -2,9 +2,10 @@ import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:money_tree/components/heading.dart';
 import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/models/ExpenseTransactionModel.dart';
-import 'package:money_tree/screens/forms/TransInputLayout.dart';
+import 'package:money_tree/screens/layoutManagers/TransInputLayout.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
 import 'package:month_picker_strip/month_picker_strip.dart';
@@ -39,6 +40,7 @@ class _BudgetTransactionsState extends State<BudgetTransactions> {
       body: ListView(
         physics: BouncingScrollPhysics(),
         children: [
+          //Month Selector Strip
           FutureBuilder<dynamic>(
               future:
                   DBProvider.db.getFirstTransactionforCard(widget.bankCard.id),
@@ -64,45 +66,44 @@ class _BudgetTransactionsState extends State<BudgetTransactions> {
                   return Container();
                 }
               }),
+
+          //Seperator
           Divider(
             height: 1.0,
           ),
-          Padding(
+
+          //Expense Transaction Heading
+          Heading(
+            title: need ? "Need Transactions" : "Want Transactions",
+            fontSize: 22,
             padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Text(need ? "Need Transactions" : "Want Transactions",
-                    style: GoogleFonts.inter(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF3A3A3A))),
-                RaisedButton(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18.0),
-                      side: BorderSide(color: Colors.teal[300])),
-                  onPressed: () {
-                    setState(() {
-                      if (need) {
-                        need = false;
-                      } else {
-                        need = true;
-                      }
-                    });
-                  },
-                  color: Colors.teal[300],
-                  textColor: Colors.white,
-                  child: Text(need ? "WANT" : "NEED",
-                      style: TextStyle(fontSize: 12)),
-                ),
-              ],
+            child: RaisedButton(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0),
+                  side: BorderSide(color: Colors.teal[300])),
+              onPressed: () {
+                setState(() {
+                  if (need) {
+                    need = false;
+                  } else {
+                    need = true;
+                  }
+                });
+              },
+              color: Colors.teal[300],
+              textColor: Colors.white,
+              child:
+                  Text(need ? "WANT" : "NEED", style: TextStyle(fontSize: 12)),
             ),
           ),
+
+          //Seperator
           SizedBox(
             height: 10,
             width: double.infinity,
           ),
+
+          //Dynamic List Of Expense Transactions
           FutureBuilder<List<ExpenseTransaction>>(
             future: need
                 ? DBProvider.db.getMonthNeedExpenseTransactions(

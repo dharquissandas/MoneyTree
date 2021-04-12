@@ -33,15 +33,22 @@ class _AddExpenseState extends State<AddExpense> {
   var currencycontroller = CurrencyTextFieldController(
       rightSymbol: "£", decimalSymbol: ".", thousandSymbol: ",");
 
+  //Check Whether Updating Expense or Creating New Expense
   @override
   void initState() {
     getCurrency().then((value) {
       currencycontroller = CurrencyTextFieldController(
           rightSymbol: value, decimalSymbol: ".", thousandSymbol: ",");
       setState(() {});
+    }).then((value) {
+      currencycontroller.text =
+          FlutterMoneyFormatter(amount: widget.transaction.amount)
+              .output
+              .nonSymbol;
     });
 
     super.initState();
+
     if (widget.transaction != null) {
       expenseid = widget.transaction.id;
       expensename = widget.transaction.name;
@@ -58,10 +65,6 @@ class _AddExpenseState extends State<AddExpense> {
       expensecategory = widget.transaction.category;
 
       expenseamount = widget.transaction.amount;
-      currencycontroller.text =
-          FlutterMoneyFormatter(amount: widget.transaction.amount)
-              .output
-              .nonSymbol;
 
       need = widget.transaction.need == 1 ? true : false;
       want = widget.transaction.need == 0 ? true : false;
@@ -79,6 +82,7 @@ class _AddExpenseState extends State<AddExpense> {
     }
   }
 
+  //Build Date Data
   Future<Null> _buildDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
         context: context,
@@ -95,6 +99,7 @@ class _AddExpenseState extends State<AddExpense> {
     }
   }
 
+  //Build Expense Source
   Widget buildName() {
     return TextFormField(
       autocorrect: true,
@@ -112,6 +117,7 @@ class _AddExpenseState extends State<AddExpense> {
     );
   }
 
+  //Build Expense Date
   Widget buildDate() {
     return GestureDetector(
       onTap: () => _buildDate(context),
@@ -127,6 +133,7 @@ class _AddExpenseState extends State<AddExpense> {
     );
   }
 
+  //Build Expense Categories
   Widget buildCategory() {
     return FutureBuilder<List<Category>>(
         future: DBProvider.db.getExpenseCategories(),
@@ -158,6 +165,7 @@ class _AddExpenseState extends State<AddExpense> {
         });
   }
 
+  //Build Card Selector
   Widget buildCardCategory() {
     return FutureBuilder<List<BankCard>>(
         future: DBProvider.db.getBankCards(),
@@ -197,6 +205,7 @@ class _AddExpenseState extends State<AddExpense> {
         });
   }
 
+  //Build Expenditure Amount
   Widget buildAmount() {
     return TextFormField(
       controller: currencycontroller,
@@ -216,6 +225,7 @@ class _AddExpenseState extends State<AddExpense> {
     );
   }
 
+  // Build Reoccur (Deprecated)
   Widget buildReoccur() {
     return CheckboxListTile(
       value: expensereoccur,
@@ -229,6 +239,7 @@ class _AddExpenseState extends State<AddExpense> {
     );
   }
 
+  //Build Need/Want Option
   Widget buildNeedChoice() {
     return Column(
       children: [
@@ -262,6 +273,7 @@ class _AddExpenseState extends State<AddExpense> {
     );
   }
 
+  //Paint Fields on Screen
   @override
   Widget build(BuildContext context) {
     return Scaffold(

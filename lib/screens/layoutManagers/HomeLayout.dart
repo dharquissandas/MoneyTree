@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:money_tree/screens/preferences/CardOrganiser.dart';
 import 'package:money_tree/screens/homePages/Dashboard.dart';
-import 'package:money_tree/screens/forms/TransInputLayout.dart';
+import 'package:money_tree/screens/layoutManagers/TransInputLayout.dart';
 import 'package:money_tree/screens/homePages/TreesPage.dart';
 import 'package:money_tree/screens/preferences/SavingsOrganiser.dart';
+import 'package:money_tree/utils/Dialogues.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:money_tree/screens/homePages/ExpensePage.dart';
 import 'package:money_tree/screens/homePages/IncomePage.dart';
-import 'package:money_tree/utils/Preferences.dart';
-import 'package:money_tree/utils/Notifications.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -29,12 +28,14 @@ class _HomeState extends State<Home> {
     pageIndex = 0;
   }
 
+  //Page Changer
   changePage(int index) {
     setState(() {
       pageIndex = index;
     });
   }
 
+  //Page Setter
   pageSetter() {
     if (pageIndex == 0) {
       return Dashboard();
@@ -47,12 +48,30 @@ class _HomeState extends State<Home> {
     }
   }
 
+  //Redirect to Card Organiser
+  openCardOrganiser() {
+    Navigator.pop(context);
+    Navigator.push(
+        context,
+        PageTransition(
+            type: PageTransitionType.rightToLeft, child: CardOrganiser()));
+  }
+
+  //Redirec to Savings Organiser
+  openSavingsOrganiser() {
+    Navigator.pop(context);
+    Navigator.push(
+        context,
+        PageTransition(
+            type: PageTransitionType.rightToLeft, child: SavingsOrganiser()));
+  }
+
+  //Build Layout
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: Drawer(
         child: ListView(
-          // Important: Remove any padding from the ListView.
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
@@ -64,110 +83,25 @@ class _HomeState extends State<Home> {
             ListTile(
                 title: Text('Cards Organiser'),
                 onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                      context,
-                      PageTransition(
-                          type: PageTransitionType.rightToLeft,
-                          child: CardOrganiser()));
+                  openCardOrganiser();
                 }),
             ListTile(
               title: Text('Saving Tree Organiser'),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    PageTransition(
-                        type: PageTransitionType.rightToLeft,
-                        child: SavingsOrganiser()));
+                openSavingsOrganiser();
               },
             ),
             ListTile(
               title: Text('Currency Selector'),
               onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => SimpleDialog(
-                    title: const Text('Select Currency'),
-                    children: <Widget>[
-                      SimpleDialogOption(
-                        onPressed: () {
-                          setCurrency("£");
-                          Navigator.pushAndRemoveUntil(
-                              context,
-                              PageTransition(
-                                  type: PageTransitionType.rightToLeft,
-                                  child: Home()),
-                              (r) => false);
-                        },
-                        child: const Text('Pounds (£)'),
-                      ),
-                      SimpleDialogOption(
-                        onPressed: () {
-                          setCurrency("\$");
-                          Navigator.pushAndRemoveUntil(
-                              context,
-                              PageTransition(
-                                  type: PageTransitionType.rightToLeft,
-                                  child: Home()),
-                              (r) => false);
-                        },
-                        child: const Text('Dollars (\$)'),
-                      ),
-                      SimpleDialogOption(
-                        onPressed: () {
-                          setCurrency("€");
-                          Navigator.pushAndRemoveUntil(
-                              context,
-                              PageTransition(
-                                  type: PageTransitionType.rightToLeft,
-                                  child: Home()),
-                              (r) => false);
-                        },
-                        child: const Text('Euros (€)'),
-                      ),
-                    ],
-                  ),
-                );
+                openCurrencySelector(context);
               },
             ),
             ListTile(
               title: Text('Notifications'),
               onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => SimpleDialog(
-                    title: const Text('Show Daily Notifications'),
-                    children: <Widget>[
-                      SimpleDialogOption(
-                        onPressed: () {
-                          scheduleRecorruingNotification(
-                              flutterLocalNotificationsPlugin);
-                          Navigator.pushAndRemoveUntil(
-                              context,
-                              PageTransition(
-                                  type: PageTransitionType.rightToLeft,
-                                  child: Home()),
-                              (r) => false);
-                        },
-                        child: const Text('Allow Notifications'),
-                      ),
-                      SimpleDialogOption(
-                        onPressed: () {
-                          turnReoccuringNotificationOff(
-                              flutterLocalNotificationsPlugin);
-                          Navigator.pushAndRemoveUntil(
-                              context,
-                              PageTransition(
-                                  type: PageTransitionType.rightToLeft,
-                                  child: Home()),
-                              (r) => false);
-                        },
-                        child: const Text('Disable Notifications'),
-                      ),
-                    ],
-                  ),
-                );
+                openNotificationSelection(
+                    context, flutterLocalNotificationsPlugin);
               },
             ),
           ],
@@ -208,58 +142,63 @@ class _HomeState extends State<Home> {
         hasNotch: true,
         fabLocation: BubbleBottomBarFabLocation.end,
         onTap: changePage,
-        items: <BubbleBottomBarItem>[
-          BubbleBottomBarItem(
-            backgroundColor: Colors.teal[300],
-            icon: Icon(
-              Icons.dashboard,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.dashboard,
-              color: Colors.teal[300],
-            ),
-            title: Text("Dashboard"),
-          ),
-          BubbleBottomBarItem(
-            backgroundColor: Colors.teal[300],
-            icon: Icon(
-              Icons.filter_vintage,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.filter_vintage,
-              color: Colors.teal[300],
-            ),
-            title: Text("Tree"),
-          ),
-          BubbleBottomBarItem(
-            backgroundColor: Colors.green,
-            icon: Icon(
-              Icons.trending_up,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.trending_up,
-              color: Colors.green,
-            ),
-            title: Text("Income"),
-          ),
-          BubbleBottomBarItem(
-            backgroundColor: Colors.red,
-            icon: Icon(
-              Icons.trending_down,
-              color: Colors.black,
-            ),
-            activeIcon: Icon(
-              Icons.trending_down,
-              color: Colors.red,
-            ),
-            title: Text("Expense"),
-          ),
-        ],
+        items: buildPages(),
       ),
       body: pageSetter(),
     );
+  }
+
+  //Buld Buttom Tabs
+  buildPages() {
+    return <BubbleBottomBarItem>[
+      BubbleBottomBarItem(
+        backgroundColor: Colors.teal[300],
+        icon: Icon(
+          Icons.dashboard,
+          color: Colors.black,
+        ),
+        activeIcon: Icon(
+          Icons.dashboard,
+          color: Colors.teal[300],
+        ),
+        title: Text("Dashboard"),
+      ),
+      BubbleBottomBarItem(
+        backgroundColor: Colors.teal[300],
+        icon: Icon(
+          Icons.filter_vintage,
+          color: Colors.black,
+        ),
+        activeIcon: Icon(
+          Icons.filter_vintage,
+          color: Colors.teal[300],
+        ),
+        title: Text("Tree"),
+      ),
+      BubbleBottomBarItem(
+        backgroundColor: Colors.green,
+        icon: Icon(
+          Icons.trending_up,
+          color: Colors.black,
+        ),
+        activeIcon: Icon(
+          Icons.trending_up,
+          color: Colors.green,
+        ),
+        title: Text("Income"),
+      ),
+      BubbleBottomBarItem(
+        backgroundColor: Colors.red,
+        icon: Icon(
+          Icons.trending_down,
+          color: Colors.black,
+        ),
+        activeIcon: Icon(
+          Icons.trending_down,
+          color: Colors.red,
+        ),
+        title: Text("Expense"),
+      ),
+    ];
   }
 }

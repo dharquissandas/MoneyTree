@@ -33,12 +33,18 @@ class _AddSavingState extends State<AddSaving> {
   var controller = CurrencyTextFieldController(
       rightSymbol: "£", decimalSymbol: ".", thousandSymbol: ",");
 
+  //Check Whether Updating/Adding Saving Transaction
   @override
   void initState() {
     getCurrency().then((value) {
       controller = CurrencyTextFieldController(
           rightSymbol: value, decimalSymbol: ".", thousandSymbol: ",");
       setState(() {});
+    }).then((value) {
+      controller.text =
+          FlutterMoneyFormatter(amount: widget.transaction.paymentamount)
+              .output
+              .nonSymbol;
     });
     if (widget.transaction != null) {
       savingid = widget.transaction.id;
@@ -82,6 +88,7 @@ class _AddSavingState extends State<AddSaving> {
     super.initState();
   }
 
+  //Boolean to Int for database Storage
   int boolcheck(bool reoccur) {
     if (reoccur) {
       return 1;
@@ -89,6 +96,7 @@ class _AddSavingState extends State<AddSaving> {
     return 0;
   }
 
+  //Build Date Data
   Future<Null> _buildDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
       context: context,
@@ -106,6 +114,7 @@ class _AddSavingState extends State<AddSaving> {
     }
   }
 
+  //Build Card Selector
   Widget buildCardCategory() {
     return FutureBuilder<List<BankCard>>(
         future: DBProvider.db.getBankCards(),
@@ -145,6 +154,7 @@ class _AddSavingState extends State<AddSaving> {
         });
   }
 
+  //Build Savings Choice
   Widget buildSavingCategory() {
     return FutureBuilder<List<Saving>>(
         future: DBProvider.db.getSavings(),
@@ -180,6 +190,7 @@ class _AddSavingState extends State<AddSaving> {
         });
   }
 
+  //Build Savings Amount (With Error Checking)
   Widget buildSavingAmount() {
     return TextFormField(
       controller: controller,
@@ -211,6 +222,7 @@ class _AddSavingState extends State<AddSaving> {
     );
   }
 
+  //Build Saving Date
   Widget buildDate() {
     return GestureDetector(
       onTap: () => _buildDate(context),
@@ -226,6 +238,7 @@ class _AddSavingState extends State<AddSaving> {
     );
   }
 
+  //Build Reoccur (Deprecated)
   Widget buildReoccur() {
     return CheckboxListTile(
       value: savingreoccur,
@@ -239,6 +252,7 @@ class _AddSavingState extends State<AddSaving> {
     );
   }
 
+  //Paint Fields On Screen
   @override
   Widget build(BuildContext context) {
     return Scaffold(

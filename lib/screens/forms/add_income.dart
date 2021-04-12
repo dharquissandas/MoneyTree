@@ -31,6 +31,7 @@ class _AddIncomeState extends State<AddIncome> {
   var currencycontroller = CurrencyTextFieldController(
       rightSymbol: "£", decimalSymbol: ".", thousandSymbol: ",");
 
+  //Check Whether Updating/ Adding New Income
   @override
   void initState() {
     super.initState();
@@ -38,6 +39,11 @@ class _AddIncomeState extends State<AddIncome> {
       currencycontroller = CurrencyTextFieldController(
           rightSymbol: value, decimalSymbol: ".", thousandSymbol: ",");
       setState(() {});
+    }).then((value) {
+      currencycontroller.text =
+          FlutterMoneyFormatter(amount: widget.transaction.amount)
+              .output
+              .nonSymbol;
     });
     if (widget.transaction != null) {
       incomeid = widget.transaction.id;
@@ -68,6 +74,7 @@ class _AddIncomeState extends State<AddIncome> {
     }
   }
 
+  //Convert Bool to Value for Database Storage
   int boolcheck(bool reoccur) {
     if (reoccur) {
       return 1;
@@ -75,6 +82,7 @@ class _AddIncomeState extends State<AddIncome> {
     return 0;
   }
 
+  //Build Date Data
   Future<Null> _buildDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
         context: context,
@@ -91,6 +99,7 @@ class _AddIncomeState extends State<AddIncome> {
     }
   }
 
+  //Build Income Source
   Widget buildName() {
     return TextFormField(
       autocorrect: true,
@@ -108,6 +117,7 @@ class _AddIncomeState extends State<AddIncome> {
     );
   }
 
+  //Build Date Field
   Widget buildDate() {
     return GestureDetector(
       onTap: () => _buildDate(context),
@@ -123,6 +133,7 @@ class _AddIncomeState extends State<AddIncome> {
     );
   }
 
+  //Build Income Categories
   Widget buildCategory() {
     return FutureBuilder<List<Category>>(
         future: DBProvider.db.getIncomeCategories(),
@@ -154,6 +165,7 @@ class _AddIncomeState extends State<AddIncome> {
         });
   }
 
+  //Build Bankcard Selector
   Widget buildCardCategory() {
     return FutureBuilder<List<BankCard>>(
         future: DBProvider.db.getBankCards(),
@@ -188,6 +200,7 @@ class _AddIncomeState extends State<AddIncome> {
         });
   }
 
+  //Build Income Amount
   Widget buildAmount() {
     return TextFormField(
       controller: currencycontroller,
@@ -204,6 +217,7 @@ class _AddIncomeState extends State<AddIncome> {
     );
   }
 
+  //Build Reoccur Checkbox (Deprecated)
   Widget buildReoccur() {
     return CheckboxListTile(
       value: incomereoccur,
@@ -217,6 +231,7 @@ class _AddIncomeState extends State<AddIncome> {
     );
   }
 
+  //Paint Fields on Screen
   @override
   Widget build(BuildContext context) {
     return Scaffold(

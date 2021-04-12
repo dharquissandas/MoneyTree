@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:money_tree/models/ExpenseTransactionModel.dart';
-import 'package:money_tree/screens/forms/TransInputLayout.dart';
+import 'package:money_tree/screens/layoutManagers/TransInputLayout.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
 import 'package:month_picker_strip/month_picker_strip.dart';
@@ -34,6 +34,7 @@ class _ExpensePageState extends State<ExpensePage> {
     return Scaffold(
       body: ListView(
         children: [
+          //Get Month Strip
           FutureBuilder<dynamic>(
               future: DBProvider.db.getFirstExpenseTransaction(),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
@@ -58,13 +59,19 @@ class _ExpensePageState extends State<ExpensePage> {
                   return Container();
                 }
               }),
+
+          //Seperator
           Divider(
             height: 1.0,
           ),
+
+          //Spacer
           SizedBox(
             height: 10,
             width: double.infinity,
           ),
+
+          //Expense Transaction List
           FutureBuilder<List<ExpenseTransaction>>(
             future:
                 DBProvider.db.getExpenseTransactionListbyMonth(selectedMonth),

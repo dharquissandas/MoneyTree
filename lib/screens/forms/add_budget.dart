@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:flutter_xlider/flutter_xlider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:money_tree/components/backgroundCard.dart';
 import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/models/BudgetModel.dart';
 import 'package:money_tree/models/CategoryModel.dart';
@@ -26,7 +27,7 @@ class _AddBudgetState extends State<AddBudget> {
   double _saveLowerValue = 0;
 
   var dismissedList = new List();
-
+  //Controllers for Categories
   var controller1 = CurrencyTextFieldController(
       rightSymbol: "£", decimalSymbol: ".", thousandSymbol: ",");
   var controller2 = CurrencyTextFieldController(
@@ -143,6 +144,7 @@ class _AddBudgetState extends State<AddBudget> {
     super.initState();
   }
 
+  //Get Controller for Interger
   CurrencyTextFieldController getcontroller(int id) {
     if (id == 1) return controller1;
     if (id == 2) return controller2;
@@ -157,6 +159,7 @@ class _AddBudgetState extends State<AddBudget> {
     if (id == 11) return controller11;
   }
 
+  //Check If Card Is Dismissed
   checkDismissed(CurrencyTextFieldController c) {
     for (int i = 0; i < dismissedList.length; i++) {
       if (getcontroller(dismissedList[i]) == c) {
@@ -166,6 +169,7 @@ class _AddBudgetState extends State<AddBudget> {
     return c.doubleValue;
   }
 
+  //Build Amount
   Widget buildAmount(int id) {
     return Container(
       width: 130,
@@ -183,138 +187,121 @@ class _AddBudgetState extends State<AddBudget> {
     );
   }
 
+  //Build Budget Sliders, Need, Want, Save
   Widget buildBudgetSlider() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: Container(
-        decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 5,
-                spreadRadius: 1,
-                offset: Offset(0, 2.0),
-              )
-            ],
-            borderRadius: BorderRadius.all(
-              Radius.circular(20),
+    return BackgroundCard(
+      height: 260,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 16, top: 16),
+            child: Text(
+              'NEEDS:',
+              style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.green),
             ),
-            color: Colors.white),
-        height: 260,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 16, top: 16),
-              child: Text(
-                'NEEDS:',
-                style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.green),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: FlutterSlider(
-                      handlerHeight: 30,
-                      values: [_needLowerValue],
-                      min: 0,
-                      max: 100,
-                      step: FlutterSliderStep(step: 5),
-                      tooltip: FlutterSliderTooltip(disabled: true),
-                      trackBar: FlutterSliderTrackBar(
-                          activeTrackBar: BoxDecoration(color: Colors.green)),
-                      onDragging: (handlerIndex, nlowerValue, nupperValue) {
-                        _needLowerValue = nlowerValue;
-                        setState(() {});
-                      },
-                    ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: FlutterSlider(
+                    handlerHeight: 30,
+                    values: [_needLowerValue],
+                    min: 0,
+                    max: 100,
+                    step: FlutterSliderStep(step: 5),
+                    tooltip: FlutterSliderTooltip(disabled: true),
+                    trackBar: FlutterSliderTrackBar(
+                        activeTrackBar: BoxDecoration(color: Colors.green)),
+                    onDragging: (handlerIndex, nlowerValue, nupperValue) {
+                      _needLowerValue = nlowerValue;
+                      setState(() {});
+                    },
                   ),
-                  Text(_needLowerValue.toInt().toString() + "%")
-                ],
-              ),
+                ),
+                Text(_needLowerValue.toInt().toString() + "%")
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(
-                left: 16,
-              ),
-              child: Text(
-                'WANTS:',
-                style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.red),
-              ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(
+              left: 16,
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: FlutterSlider(
-                      values: [_wantLowerValue],
-                      handlerHeight: 30,
-                      max: 100,
-                      min: 0,
-                      step: FlutterSliderStep(step: 5),
-                      tooltip: FlutterSliderTooltip(disabled: true),
-                      trackBar: FlutterSliderTrackBar(
-                          activeTrackBar: BoxDecoration(color: Colors.red)),
-                      onDragging: (handlerIndex, wlowerValue, wupperValue) {
-                        _wantLowerValue = wlowerValue;
-                        setState(() {});
-                      },
-                    ),
+            child: Text(
+              'WANTS:',
+              style: GoogleFonts.inter(
+                  fontSize: 15, fontWeight: FontWeight.w500, color: Colors.red),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: FlutterSlider(
+                    values: [_wantLowerValue],
+                    handlerHeight: 30,
+                    max: 100,
+                    min: 0,
+                    step: FlutterSliderStep(step: 5),
+                    tooltip: FlutterSliderTooltip(disabled: true),
+                    trackBar: FlutterSliderTrackBar(
+                        activeTrackBar: BoxDecoration(color: Colors.red)),
+                    onDragging: (handlerIndex, wlowerValue, wupperValue) {
+                      _wantLowerValue = wlowerValue;
+                      setState(() {});
+                    },
                   ),
-                  Text(_wantLowerValue.toInt().toString() + "%")
-                ],
-              ),
+                ),
+                Text(_wantLowerValue.toInt().toString() + "%")
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 16.0),
-              child: Text(
-                'SAVING:',
-                style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.teal[300]),
-              ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: Text(
+              'SAVING:',
+              style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.teal[300]),
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: FlutterSlider(
-                      values: [_saveLowerValue],
-                      handlerHeight: 30,
-                      max: 100,
-                      min: 0,
-                      step: FlutterSliderStep(step: 5),
-                      tooltip: FlutterSliderTooltip(disabled: true),
-                      trackBar: FlutterSliderTrackBar(
-                          activeTrackBar:
-                              BoxDecoration(color: Colors.teal[300])),
-                      onDragging: (handlerIndex, slowerValue, supperValue) {
-                        _saveLowerValue = slowerValue;
-                        setState(() {});
-                      },
-                    ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: FlutterSlider(
+                    values: [_saveLowerValue],
+                    handlerHeight: 30,
+                    max: 100,
+                    min: 0,
+                    step: FlutterSliderStep(step: 5),
+                    tooltip: FlutterSliderTooltip(disabled: true),
+                    trackBar: FlutterSliderTrackBar(
+                        activeTrackBar: BoxDecoration(color: Colors.teal[300])),
+                    onDragging: (handlerIndex, slowerValue, supperValue) {
+                      _saveLowerValue = slowerValue;
+                      setState(() {});
+                    },
                   ),
-                  Text(_saveLowerValue.toInt().toString() + "%")
-                ],
-              ),
-            )
-          ],
-        ),
+                ),
+                Text(_saveLowerValue.toInt().toString() + "%")
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
 
+  //Build CategoryList with Value Entry
   Widget buildCategoryList() {
     return FutureBuilder<List<Category>>(
       future: DBProvider.db.getExpenseCategories(),
@@ -322,7 +309,6 @@ class _AddBudgetState extends State<AddBudget> {
         if (snapshot.hasData) {
           return ListView.builder(
             itemCount: snapshot.data.length,
-            padding: EdgeInsets.only(left: 16, right: 16),
             shrinkWrap: true,
             physics: BouncingScrollPhysics(),
             itemBuilder: (BuildContext context, int index) {
@@ -332,23 +318,11 @@ class _AddBudgetState extends State<AddBudget> {
                   dismissedList.add(c.id);
                 },
                 key: Key(c.id.toString()),
-                child: Container(
-                  margin: EdgeInsets.only(bottom: 13),
-                  child: Container(
-                    height: 70,
-                    padding: EdgeInsets.only(left: 24, bottom: 12, right: 22),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 5,
-                          spreadRadius: 1,
-                          offset: Offset(0, 2.0),
-                        )
-                      ],
-                    ),
+                child: BackgroundCard(
+                  height: 70,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.only(left: 16, right: 16, bottom: 8),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
@@ -387,6 +361,68 @@ class _AddBudgetState extends State<AddBudget> {
     );
   }
 
+  //Add or Update Budget upon Confirmation
+  addOrUpdateBudget() {
+    if (_needLowerValue + _saveLowerValue + _wantLowerValue != 100) {
+      final snackbar = SnackBar(
+          duration: Duration(seconds: 2),
+          content: Text(
+            "Budgeting Ratio Does Not Sum To 100%",
+            style: TextStyle(color: Colors.redAccent),
+          ));
+      Scaffold.of(context).showSnackBar(snackbar);
+    } else {
+      Budget budget = new Budget(
+          bankcard: widget.bankCard.id,
+          month: DateTime(DateTime.now().year, DateTime.now().month)
+              .toIso8601String(),
+          need: _needLowerValue.toInt(),
+          want: _wantLowerValue.toInt(),
+          save: _saveLowerValue.toInt(),
+          foodamount: checkDismissed(controller1),
+          sociallifeamount: checkDismissed(controller2),
+          selfdevamount: checkDismissed(controller3),
+          cultureamount: checkDismissed(controller4),
+          householdamount: checkDismissed(controller5),
+          apperalamount: checkDismissed(controller6),
+          beautyamount: checkDismissed(controller7),
+          healthamount: checkDismissed(controller8),
+          educationamount: checkDismissed(controller9),
+          giftamount: checkDismissed(controller10),
+          techamount: checkDismissed(controller11));
+      if (widget.budget == Null) {
+        DBProvider.db.newBudget(budget);
+      } else {
+        Budget budget = new Budget(
+            id: widget.budget.id,
+            bankcard: widget.bankCard.id,
+            month: DateTime(DateTime.now().year, DateTime.now().month)
+                .toIso8601String(),
+            need: _needLowerValue.toInt(),
+            want: _wantLowerValue.toInt(),
+            save: _saveLowerValue.toInt(),
+            foodamount: checkDismissed(controller1),
+            sociallifeamount: checkDismissed(controller2),
+            selfdevamount: checkDismissed(controller3),
+            cultureamount: checkDismissed(controller4),
+            householdamount: checkDismissed(controller5),
+            apperalamount: checkDismissed(controller6),
+            beautyamount: checkDismissed(controller7),
+            healthamount: checkDismissed(controller8),
+            educationamount: checkDismissed(controller9),
+            giftamount: checkDismissed(controller10),
+            techamount: checkDismissed(controller11));
+        DBProvider.db.updateBudget(budget, widget.budget.id);
+      }
+
+      Navigator.push(
+        context,
+        PageTransition(type: PageTransitionType.upToDown, child: Home()),
+      );
+    }
+  }
+
+  //Paint Widgets To Screen
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -411,67 +447,7 @@ class _AddBudgetState extends State<AddBudget> {
                 elevation: 20,
                 label: Text("Confirm"),
                 onPressed: () {
-                  if (_needLowerValue + _saveLowerValue + _wantLowerValue !=
-                      100) {
-                    final snackbar = SnackBar(
-                        duration: Duration(seconds: 2),
-                        content: Text(
-                          "Budgeting Ratio Does Not Sum To 100%",
-                          style: TextStyle(color: Colors.redAccent),
-                        ));
-                    Scaffold.of(context).showSnackBar(snackbar);
-                  } else {
-                    Budget budget = new Budget(
-                        bankcard: widget.bankCard.id,
-                        month:
-                            DateTime(DateTime.now().year, DateTime.now().month)
-                                .toIso8601String(),
-                        need: _needLowerValue.toInt(),
-                        want: _wantLowerValue.toInt(),
-                        save: _saveLowerValue.toInt(),
-                        foodamount: checkDismissed(controller1),
-                        sociallifeamount: checkDismissed(controller2),
-                        selfdevamount: checkDismissed(controller3),
-                        cultureamount: checkDismissed(controller4),
-                        householdamount: checkDismissed(controller5),
-                        apperalamount: checkDismissed(controller6),
-                        beautyamount: checkDismissed(controller7),
-                        healthamount: checkDismissed(controller8),
-                        educationamount: checkDismissed(controller9),
-                        giftamount: checkDismissed(controller10),
-                        techamount: checkDismissed(controller11));
-                    if (widget.budget == Null) {
-                      DBProvider.db.newBudget(budget);
-                    } else {
-                      Budget budget = new Budget(
-                          id: widget.budget.id,
-                          bankcard: widget.bankCard.id,
-                          month: DateTime(
-                                  DateTime.now().year, DateTime.now().month)
-                              .toIso8601String(),
-                          need: _needLowerValue.toInt(),
-                          want: _wantLowerValue.toInt(),
-                          save: _saveLowerValue.toInt(),
-                          foodamount: checkDismissed(controller1),
-                          sociallifeamount: checkDismissed(controller2),
-                          selfdevamount: checkDismissed(controller3),
-                          cultureamount: checkDismissed(controller4),
-                          householdamount: checkDismissed(controller5),
-                          apperalamount: checkDismissed(controller6),
-                          beautyamount: checkDismissed(controller7),
-                          healthamount: checkDismissed(controller8),
-                          educationamount: checkDismissed(controller9),
-                          giftamount: checkDismissed(controller10),
-                          techamount: checkDismissed(controller11));
-                      DBProvider.db.updateBudget(budget, widget.budget.id);
-                    }
-
-                    Navigator.push(
-                      context,
-                      PageTransition(
-                          type: PageTransitionType.upToDown, child: Home()),
-                    );
-                  }
+                  addOrUpdateBudget();
                 },
               );
             },

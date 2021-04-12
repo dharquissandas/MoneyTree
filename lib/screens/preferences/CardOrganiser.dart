@@ -29,6 +29,17 @@ class _CardOrganiserState extends State<CardOrganiser> {
     super.initState();
   }
 
+  updateBankCardOrder() {
+    for (var i = 0; i < bclist.length; i++) {
+      DBProvider.db.updateBankCardOrder(i, bclist[i].id);
+    }
+
+    Navigator.pushAndRemoveUntil(
+        context,
+        PageTransition(type: PageTransitionType.leftToRight, child: Home()),
+        (route) => false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,15 +60,7 @@ class _CardOrganiserState extends State<CardOrganiser> {
             elevation: 20,
             label: Text("Confirm"),
             onPressed: () {
-              for (var i = 0; i < bclist.length; i++) {
-                DBProvider.db.updateBankCardOrder(i, bclist[i].id);
-              }
-
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  PageTransition(
-                      type: PageTransitionType.leftToRight, child: Home()),
-                  (route) => false);
+              updateBankCardOrder();
             }),
       ),
       body: Container(

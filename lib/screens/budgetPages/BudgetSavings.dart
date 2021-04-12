@@ -2,10 +2,10 @@ import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:money_tree/components/heading.dart';
 import 'package:money_tree/models/BankCardModel.dart';
-import 'package:money_tree/models/ExpenseTransactionModel.dart';
 import 'package:money_tree/models/SavingsTransactionModel.dart';
-import 'package:money_tree/screens/forms/TransInputLayout.dart';
+import 'package:money_tree/screens/layoutManagers/TransInputLayout.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
 import 'package:month_picker_strip/month_picker_strip.dart';
@@ -39,6 +39,7 @@ class _BudgetSavingsState extends State<BudgetSavings> {
       body: ListView(
         physics: BouncingScrollPhysics(),
         children: [
+          //Month Selection Strip
           FutureBuilder<dynamic>(
               future:
                   DBProvider.db.getFirstTransactionforCard(widget.bankCard.id),
@@ -64,27 +65,26 @@ class _BudgetSavingsState extends State<BudgetSavings> {
                   return Container();
                 }
               }),
+
+          //Seperator
           Divider(
             height: 1.0,
           ),
-          Padding(
+
+          //Savings Heading
+          Heading(
+            title: "Savings",
             padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Text("Savings",
-                    style: GoogleFonts.inter(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF3A3A3A))),
-              ],
-            ),
+            fontSize: 22,
           ),
+
+          //Seperator
           SizedBox(
             height: 10,
             width: double.infinity,
           ),
+
+          //Dynamic Savings Transaction List
           FutureBuilder<List<SavingTransaction>>(
             future: DBProvider.db
                 .getMonthSavingTransList(widget.bankCard.id, selectedMonth),

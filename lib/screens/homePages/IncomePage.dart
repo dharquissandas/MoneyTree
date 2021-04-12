@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_money_formatter/flutter_money_formatter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:money_tree/models/IncomeTransactionModel.dart';
-import 'package:money_tree/screens/forms/TransInputLayout.dart';
+import 'package:money_tree/screens/layoutManagers/TransInputLayout.dart';
 import 'package:money_tree/utils/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
 import 'package:month_picker_strip/month_picker_strip.dart';
@@ -35,6 +35,7 @@ class _IncomePageState extends State<IncomePage> {
       body: ListView(
         physics: BouncingScrollPhysics(),
         children: [
+          //Get Month Strip
           FutureBuilder<dynamic>(
               future: DBProvider.db.getFirstIncomeTransaction(),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
@@ -59,13 +60,19 @@ class _IncomePageState extends State<IncomePage> {
                   return Container();
                 }
               }),
+
+          //Seperator
           Divider(
             height: 1.0,
           ),
+
+          //Spacing
           SizedBox(
             height: 10,
             width: double.infinity,
           ),
+
+          //List of Income Transactions
           FutureBuilder<List<IncomeTransaction>>(
             future:
                 DBProvider.db.getIncomeTransactionListbyMonth(selectedMonth),

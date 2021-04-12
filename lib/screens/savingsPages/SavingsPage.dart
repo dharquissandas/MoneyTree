@@ -7,7 +7,7 @@ import 'package:money_tree/utils/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
 import 'package:page_transition/page_transition.dart';
 
-import '../forms/TransInputLayout.dart';
+import '../layoutManagers/TransInputLayout.dart';
 
 class SavingsPage extends StatefulWidget {
   final int saving;
@@ -25,6 +25,7 @@ class _SavingsPageState extends State<SavingsPage> {
     super.initState();
   }
 
+  //Build Saving list
   @override
   Widget build(BuildContext context) {
     return Scaffold(

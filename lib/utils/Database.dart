@@ -1008,8 +1008,9 @@ class DBProvider {
       for (var i = 0; i < savingtrans.length; i++) {
         deleteSavingTrans(savingtrans[i]);
       }
+    }).then((value) {
+      db.delete("savings", where: "id = ?", whereArgs: [id]);
     });
-    db.delete("savings", where: "id = ?", whereArgs: [id]);
   }
 
   //Calculated Savings
@@ -1221,23 +1222,23 @@ class DBProvider {
       );
 
       updateBankCard(bc.id, updatedcard);
+    }).then((value) {
+      getSavingById(st.saving).then((s) async {
+        Saving updatedSaving = Saving(
+            id: s.id,
+            savingOrder: s.savingOrder,
+            savingsItem: s.savingsItem,
+            amountSaved: s.amountSaved - st.paymentamount,
+            totalAmount: s.totalAmount,
+            startDate: s.startDate,
+            description: s.description,
+            calculated: s.calculated);
+
+        updateSaving(s.id, updatedSaving);
+      }).then((value) {
+        db.delete("savingstransactions", where: "id = ?", whereArgs: [st.id]);
+      });
     });
-
-    getSavingById(st.saving).then((s) async {
-      Saving updatedSaving = Saving(
-          id: s.id,
-          savingOrder: s.savingOrder,
-          savingsItem: s.savingsItem,
-          amountSaved: s.amountSaved - st.paymentamount,
-          totalAmount: s.totalAmount,
-          startDate: s.startDate,
-          description: s.description,
-          calculated: s.calculated);
-
-      updateSaving(s.id, updatedSaving);
-    });
-
-    db.delete("savingstransactions", where: "id = ?", whereArgs: [st.id]);
   }
 
   Future<double> getSavingTotalForTimeFrame(

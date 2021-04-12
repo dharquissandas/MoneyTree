@@ -16,6 +16,7 @@ class Indicator extends StatelessWidget {
     this.textColor = const Color(0xff505050),
   }) : super(key: key);
 
+  //Build Chart Indicators
   @override
   Widget build(BuildContext context) {
     return Row(

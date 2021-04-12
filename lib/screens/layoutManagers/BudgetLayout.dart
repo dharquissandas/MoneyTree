@@ -20,6 +20,7 @@ class _BudgetLayoutState extends State<BudgetLayout> {
   int pageIndex;
   dynamic currMonthBudget = Null;
 
+  //Set Page Index and get Month Budget
   @override
   void initState() {
     pageIndex = 0;
@@ -32,12 +33,14 @@ class _BudgetLayoutState extends State<BudgetLayout> {
     super.initState();
   }
 
+  //Page Changer
   changePage(int index) {
     setState(() {
       pageIndex = index;
     });
   }
 
+  //Page Setter
   pageSetter() {
     if (pageIndex == 0) {
       return BudgetInfo(bankCard: widget.card);
@@ -52,6 +55,7 @@ class _BudgetLayoutState extends State<BudgetLayout> {
     }
   }
 
+  //Define Navigation Options
   List<BubbleBottomBarItem> getNavigation() {
     return <BubbleBottomBarItem>[
       BubbleBottomBarItem(
@@ -105,6 +109,7 @@ class _BudgetLayoutState extends State<BudgetLayout> {
     ];
   }
 
+  //Build Bottom Bar
   @override
   Widget build(BuildContext context) {
     return Scaffold(

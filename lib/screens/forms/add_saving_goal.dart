@@ -9,8 +9,7 @@ import 'package:page_transition/page_transition.dart';
 import 'package:money_tree/utils/Preferences.dart';
 
 class AddSavingGoal extends StatefulWidget {
-  final Saving s;
-  AddSavingGoal({Key key, @required this.s}) : super(key: key);
+  AddSavingGoal({Key key}) : super(key: key);
   @override
   _AddSavingGoalState createState() => _AddSavingGoalState();
 }
@@ -29,9 +28,7 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
 
   String goalDate =
       DateTime.now().add(Duration(days: 1)).toIso8601String().substring(0, 10);
-
   double feasiblePayment;
-
   int paymentFrequency;
 
   var totalAmountController = CurrencyTextFieldController(
@@ -40,6 +37,10 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
   var payableController = CurrencyTextFieldController(
       rightSymbol: "£", decimalSymbol: ".", thousandSymbol: ",");
 
+  List<DropdownMenuItem<int>> frequency = [];
+  var selectedFrequency;
+
+  //Get Saving Order
   @override
   void initState() {
     getCurrency().then((value) {
@@ -49,31 +50,19 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
           rightSymbol: value, decimalSymbol: ".", thousandSymbol: ",");
       setState(() {});
     });
-    if (widget.s != null) {
-      id = widget.s.id;
-      savingorder = widget.s.savingOrder;
 
-      amountSaved = widget.s.amountSaved;
-
-      savingsitem = widget.s.savingsItem;
-      itemcontroller.text = widget.s.savingsItem;
-
-      totalAmount = widget.s.totalAmount;
-      totalAmountController.text = widget.s.totalAmount.toString();
-    } else {
-      DBProvider.db.getSavings().then((value) {
-        if (value.length > 1) {
-          setState(() {
-            savingorder = value.last.savingOrder + 1;
-          });
-        }
-      });
-      _date.value = TextEditingValue(
-          text: DateTime.now()
-              .add(Duration(days: 1))
-              .toIso8601String()
-              .substring(0, 10));
-    }
+    DBProvider.db.getSavings().then((value) {
+      if (value.length > 1) {
+        setState(() {
+          savingorder = value.last.savingOrder + 1;
+        });
+      }
+    });
+    _date.value = TextEditingValue(
+        text: DateTime.now()
+            .add(Duration(days: 1))
+            .toIso8601String()
+            .substring(0, 10));
 
     super.initState();
   }
@@ -83,9 +72,7 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
   TextEditingController itemcontroller = new TextEditingController();
   TextEditingController descriptioncontroller = new TextEditingController();
 
-  List<DropdownMenuItem<int>> frequency = [];
-  var selectedFrequency;
-
+  //Load Frequancy Selector List
   void loadFrequency() {
     frequency = [];
     frequency.add(new DropdownMenuItem(
@@ -106,22 +93,7 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
     ));
   }
 
-  calculateDayDifference() {
-    int year = int.parse(goalDate.substring(0, 4));
-    int month = int.parse(goalDate.substring(5, 7));
-    int day = int.parse(goalDate.substring(8, 10));
-
-    DateTime sDate = DateTime(year, month, day);
-
-    DateTime oDate = DateTime(
-        int.parse(DateTime.now().toIso8601String().substring(0, 4)),
-        int.parse(DateTime.now().toIso8601String().substring(5, 7)),
-        int.parse(DateTime.now().toIso8601String().substring(8, 10)));
-
-    Duration dayDifference = sDate.difference(oDate);
-    return dayDifference;
-  }
-
+  //Build Frequancy Field
   Widget buildFrequency() {
     loadFrequency();
     return DropdownButtonFormField(
@@ -148,6 +120,7 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
     );
   }
 
+  //Build Savings Goal Field
   Widget buildSavingsItem() {
     return TextFormField(
       autocorrect: true,
@@ -165,6 +138,7 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
     );
   }
 
+  //Build Total Amount Field
   Widget buildTotalAmount() {
     return TextFormField(
       controller: totalAmountController,
@@ -181,6 +155,7 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
     );
   }
 
+  //Build Payable Amount Field
   Widget buildPayable() {
     return TextFormField(
       controller: payableController,
@@ -197,6 +172,7 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
     );
   }
 
+  //Build Date Data
   Future<Null> _buildDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
         context: context,
@@ -214,6 +190,7 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
     }
   }
 
+  //Build Goal Date
   Widget buildGoalDate() {
     return GestureDetector(
       onTap: () => _buildDate(context),
@@ -229,6 +206,7 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
     );
   }
 
+  //Calculated Saving & Normal Saving Switch
   Widget buildCalculateSwitch() {
     return SwitchListTile(
       title: Text("Calculate"),
@@ -242,6 +220,7 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
     );
   }
 
+  //Build Extra Fields For Different Choices
   Widget buildCalculateChoice() {
     return Column(
       children: [
@@ -285,6 +264,7 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
     );
   }
 
+  //Build Description Field
   Widget buildDescription() {
     return TextFormField(
       autocorrect: true,
@@ -298,6 +278,81 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
     );
   }
 
+  //Add Savings Goal Database Connection
+  addSavingsGoal() {
+    if (!formkey.currentState.validate()) {
+      return;
+    }
+    formkey.currentState.save();
+
+    if (byDate && calculate) {
+      Duration daydifference = calculateDayDifference();
+      double amtperday = totalAmount / daydifference.inDays;
+      double amtperperiod = amtperday * paymentFrequency;
+      feasiblePayment = double.parse(amtperperiod.toStringAsFixed(2));
+    }
+
+    if (byAmount && calculate) {
+      int periodtime = totalAmount ~/ feasiblePayment;
+      int noDays = periodtime * paymentFrequency;
+      if (periodtime < (totalAmount / feasiblePayment)) {
+        noDays = noDays + paymentFrequency;
+      }
+      goalDate = DateTime.now()
+          .add(Duration(days: noDays))
+          .toIso8601String()
+          .substring(0, 10);
+    }
+
+    Saving saving = Saving(
+        savingOrder: savingorder,
+        savingsItem: savingsitem,
+        amountSaved: amountSaved,
+        totalAmount: totalAmount,
+        startDate: DateTime.now().toIso8601String().substring(0, 10),
+        description: description,
+        calculated: calculate ? 1 : 0);
+
+    DBProvider.db.newSaving(saving);
+
+    if (calculate) {
+      DBProvider.db.getSavings().then((value) {
+        CalculatedSaving cs = CalculatedSaving(
+          parentId: value.last.id,
+          goalDate: goalDate,
+          feasiblePayment: feasiblePayment,
+          paymentFrequency: paymentFrequency,
+          savingType: byDate ? 0 : 1,
+        );
+
+        DBProvider.db.newCalculatedSaving(cs);
+      });
+    }
+
+    Navigator.pushAndRemoveUntil(
+        context,
+        PageTransition(type: PageTransitionType.leftToRight, child: Home()),
+        (route) => false);
+  }
+
+  //Calculate Day Difference between Goal Date & Current Date
+  calculateDayDifference() {
+    int year = int.parse(goalDate.substring(0, 4));
+    int month = int.parse(goalDate.substring(5, 7));
+    int day = int.parse(goalDate.substring(8, 10));
+
+    DateTime sDate = DateTime(year, month, day);
+
+    DateTime oDate = DateTime(
+        int.parse(DateTime.now().toIso8601String().substring(0, 4)),
+        int.parse(DateTime.now().toIso8601String().substring(5, 7)),
+        int.parse(DateTime.now().toIso8601String().substring(8, 10)));
+
+    Duration dayDifference = sDate.difference(oDate);
+    return dayDifference;
+  }
+
+  //Paint Fields on Screen
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -320,80 +375,7 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
             elevation: 20,
             label: Text("Confirm"),
             onPressed: () {
-              if (!formkey.currentState.validate()) {
-                return;
-              }
-              formkey.currentState.save();
-
-              if (byDate && calculate) {
-                Duration daydifference = calculateDayDifference();
-                double amtperday = totalAmount / daydifference.inDays;
-                double amtperperiod = amtperday * paymentFrequency;
-                feasiblePayment = double.parse(amtperperiod.toStringAsFixed(2));
-              }
-
-              if (byAmount && calculate) {
-                int periodtime = totalAmount ~/ feasiblePayment;
-                int noDays = periodtime * paymentFrequency;
-                if (periodtime < (totalAmount / feasiblePayment)) {
-                  noDays = noDays + paymentFrequency;
-                }
-                goalDate = DateTime.now()
-                    .add(Duration(days: noDays))
-                    .toIso8601String()
-                    .substring(0, 10);
-              }
-
-              if (widget.s != null) {
-                Saving saving = Saving(
-                  id: id,
-                  savingOrder: savingorder,
-                  savingsItem: savingsitem,
-                  amountSaved: amountSaved,
-                  totalAmount: totalAmount,
-                );
-
-                DBProvider.db.updateSaving(id, saving);
-
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    PageTransition(
-                        type: PageTransitionType.leftToRight,
-                        child: SavingsOrganiser()),
-                    (route) => false);
-              } else {
-                Saving saving = Saving(
-                    savingOrder: savingorder,
-                    savingsItem: savingsitem,
-                    amountSaved: amountSaved,
-                    totalAmount: totalAmount,
-                    startDate:
-                        DateTime.now().toIso8601String().substring(0, 10),
-                    description: description,
-                    calculated: calculate ? 1 : 0);
-
-                DBProvider.db.newSaving(saving);
-
-                if (calculate) {
-                  DBProvider.db.getSavings().then((value) {
-                    CalculatedSaving cs = CalculatedSaving(
-                      parentId: value.last.id,
-                      goalDate: goalDate,
-                      feasiblePayment: feasiblePayment,
-                      paymentFrequency: paymentFrequency,
-                      savingType: byDate ? 0 : 1,
-                    );
-
-                    DBProvider.db.newCalculatedSaving(cs);
-                  });
-                }
-
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    PageTransition(
-                        type: PageTransitionType.leftToRight, child: Home()),
-                    (route) => false);
-              }
+              addSavingsGoal();
             }),
       ),
       body: Container(

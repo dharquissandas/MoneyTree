@@ -82,26 +82,3 @@ openNotificationSelection(context, flutterLocalNotificationsPlugin) {
     ),
   );
 }
-
-confirmationSavingsDelete(context, id) async {
-  return await showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        key: Key(id.toString()),
-        title: const Text("Delete Saving Tree"),
-        content: const Text(
-            "Deleting this saving will also delete all transactions associated with this saving. Do you wish to delete this saving?"),
-        actions: <Widget>[
-          FlatButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text("DELETE")),
-          FlatButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text("CANCEL"),
-          ),
-        ],
-      );
-    },
-  );
-}

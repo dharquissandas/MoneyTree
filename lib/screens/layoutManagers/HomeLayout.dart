@@ -1,11 +1,11 @@
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:money_tree/screens/preferences/CardOrganiser.dart';
+import 'package:money_tree/screens/organisers/CardOrganiser.dart';
 import 'package:money_tree/screens/homePages/Dashboard.dart';
 import 'package:money_tree/screens/layoutManagers/TransInputLayout.dart';
 import 'package:money_tree/screens/homePages/TreesPage.dart';
-import 'package:money_tree/screens/preferences/SavingsOrganiser.dart';
+import 'package:money_tree/screens/organisers/SavingsOrganiser.dart';
 import 'package:money_tree/utils/Dialogues.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:money_tree/screens/homePages/ExpensePage.dart';

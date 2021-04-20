@@ -54,6 +54,34 @@ BoxDecoration buildBoxDecoration() {
   );
 }
 
+Image getCardNetworkImage(BankCard bc) {
+  if (bc.cardType == "Mastercard") {
+    return Image.asset(
+      "assets/images/Mastercard.png",
+      width: 40,
+      height: 40,
+    );
+  } else if (bc.cardType == "Visa") {
+    return Image.asset(
+      "assets/images/Visa.png",
+      width: 40,
+      height: 40,
+    );
+  } else if (bc.cardType == "American Express") {
+    return Image.asset(
+      "assets/images/Amex.png",
+      width: 40,
+      height: 40,
+    );
+  } else {
+    return Image.asset(
+      "assets/images/Discover.png",
+      width: 40,
+      height: 40,
+    );
+  }
+}
+
 // Build Card Layout Stack
 Stack buildInternalCard(bc, currency) {
   return Stack(
@@ -102,14 +130,7 @@ Stack buildInternalCard(bc, currency) {
           ),
         ),
       ),
-      Positioned(
-          right: 10,
-          top: 15,
-          child: Image.asset(
-            "assets/images/Mastercard.png",
-            width: 40,
-            height: 40,
-          )),
+      Positioned(right: 10, top: 15, child: getCardNetworkImage(bc)),
       Positioned(
         left: 20,
         bottom: 45,

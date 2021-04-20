@@ -10,6 +10,43 @@ class SavingsTreeCard extends StatelessWidget {
 
   const SavingsTreeCard({Key key, this.currency, this.s}) : super(key: key);
 
+  getMoneyTree(Saving s) {
+    if (s.amountSaved == s.totalAmount) {
+      return Image.asset(
+        "assets/images/4.png",
+        height: 120,
+        width: 120,
+      );
+    } else if (s.amountSaved == 0) {
+      return Image.asset(
+        "assets/images/0.png",
+        height: 80,
+        width: 80,
+      );
+    }
+
+    double percent = (s.amountSaved / s.totalAmount) * 100;
+    if (percent >= 1 && percent < 25) {
+      return Image.asset(
+        "assets/images/1.png",
+        height: 120,
+        width: 120,
+      );
+    } else if (percent >= 25 && percent < 75) {
+      return Image.asset(
+        "assets/images/2.png",
+        height: 120,
+        width: 120,
+      );
+    } else if (percent >= 75 && percent < 100) {
+      return Image.asset(
+        "assets/images/3.png",
+        height: 120,
+        width: 120,
+      );
+    }
+  }
+
 // Display Generic White Card
   @override
   Widget build(BuildContext context) {
@@ -140,15 +177,7 @@ class SavingsTreeCard extends StatelessWidget {
                     lineColor: Colors.green,
                     percent: s.amountSaved / s.totalAmount,
                     width: 10),
-                child: Center(
-                  child: Text(
-                    "Tree",
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                child: Center(child: getMoneyTree(s)),
               ),
             ),
           ),

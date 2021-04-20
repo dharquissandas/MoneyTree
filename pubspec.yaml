@@ -64,15 +64,15 @@ flutter:
   # To add assets to your application, add an assets section, like this:
 
   assets:
-  - assets/images/Logo.png
   - assets/images/Mastercard.png
-  - assets/images/income_active.svg
-  - assets/images/income_inactive.svg
-  - assets/images/expense_active.svg
-  - assets/images/expense_inactive.svg
-  - assets/images/insight_active.svg
-  - assets/images/insight_inactive.svg
-
+  - assets/images/Visa.png
+  - assets/images/Amex.png
+  - assets/images/Discover.png
+  - assets/images/0.png
+  - assets/images/1.png
+  - assets/images/2.png
+  - assets/images/3.png
+  - assets/images/4.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 class BackgroundCard extends StatelessWidget {
   final double height;
   final Widget child;
-  final bool clickable;
 
-  const BackgroundCard({Key key, this.height, this.clickable, this.child})
-      : super(key: key);
+  const BackgroundCard({Key key, this.height, this.child}) : super(key: key);
 
 // Display Generic White Card
   @override

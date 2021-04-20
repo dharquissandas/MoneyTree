@@ -31,7 +31,7 @@ class _AddIncomeState extends State<AddIncome> {
   var currencycontroller = CurrencyTextFieldController(
       rightSymbol: "£", decimalSymbol: ".", thousandSymbol: ",");
 
-  //Check Whether Updating/ Adding New Income
+  //Check Whether Updating/Adding New Income
   @override
   void initState() {
     super.initState();

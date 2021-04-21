@@ -113,3 +113,38 @@ buildTransactionChecker() {
     ),
   );
 }
+
+// build No-Exceeding Card
+buildNoExceedingChecker() {
+  return BackgroundCard(
+    height: 70,
+    child: Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              "No Exceeding Categories",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text("Give yourself a pat on the back.",
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                )),
+          ),
+        ],
+      ),
+    ),
+  );
+}

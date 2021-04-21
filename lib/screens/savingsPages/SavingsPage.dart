@@ -43,7 +43,6 @@ class _SavingsPageState extends State<SavingsPage> {
                   itemCount: snapshot.data.length,
                   padding: EdgeInsets.only(left: 16, right: 16),
                   shrinkWrap: true,
-                  physics: BouncingScrollPhysics(),
                   itemBuilder: (BuildContext context, int index) {
                     SavingTransaction st = snapshot.data[index];
                     return Container(

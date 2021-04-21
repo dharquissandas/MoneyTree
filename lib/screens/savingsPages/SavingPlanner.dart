@@ -124,60 +124,62 @@ class _SavingsPlannerState extends State<SavingsPlanner> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        physics: BouncingScrollPhysics(),
-        children: <Widget>[
-          // Payment Plan Overview
-          Heading(
-            title: "Payment Plan Overview",
-            fontSize: 20,
-            padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 4),
-          ),
+      body: ScrollConfiguration(
+        behavior: ScrollBehavior(),
+        child: ListView(
+          children: <Widget>[
+            // Payment Plan Overview
+            Heading(
+              title: "Payment Plan Overview",
+              fontSize: 20,
+              padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 4),
+            ),
 
-          //Calculated Saving Info
-          FutureBuilder<CalculatedSaving>(
-            future:
+            //Calculated Saving Info
+            FutureBuilder<CalculatedSaving>(
+              future:
+                  DBProvider.db.getCalculateSavingByParentId(widget.saving.id),
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                if (snapshot.hasData) {
+                  CalculatedSaving cs = snapshot.data;
+                  return BackgroundCard(
+                      height: 100, child: buildCalculatedSavingsInfo(cs));
+                } else {
+                  return Center(child: CircularProgressIndicator());
+                }
+              },
+            ),
+
+            //Payment Breakdown
+            Heading(
+              title: "Payment Plan Breakdown",
+              fontSize: 20,
+              padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 4),
+            ),
+
+            //Payment Plan Table
+            FutureBuilder<dynamic>(
+              future: Future.wait([
                 DBProvider.db.getCalculateSavingByParentId(widget.saving.id),
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
-              if (snapshot.hasData) {
-                CalculatedSaving cs = snapshot.data;
-                return BackgroundCard(
-                    height: 100, child: buildCalculatedSavingsInfo(cs));
-              } else {
-                return Center(child: CircularProgressIndicator());
-              }
-            },
-          ),
-
-          //Payment Breakdown
-          Heading(
-            title: "Payment Plan Breakdown",
-            fontSize: 20,
-            padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 4),
-          ),
-
-          //Payment Plan Table
-          FutureBuilder<dynamic>(
-            future: Future.wait([
-              DBProvider.db.getCalculateSavingByParentId(widget.saving.id),
-              DBProvider.db.getSavingsTransForSaving(widget.saving.id)
-            ]),
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
-              if (snapshot.hasData) {
-                return BackgroundCard(
-                  child: PaymentTable(
-                    transList: snapshot.data[1],
-                    saving: widget.saving,
-                    calculatedSaving: snapshot.data[0],
-                    currency: currency,
-                  ),
-                );
-              } else {
-                return Center(child: CircularProgressIndicator());
-              }
-            },
-          )
-        ],
+                DBProvider.db.getSavingsTransForSaving(widget.saving.id)
+              ]),
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                if (snapshot.hasData) {
+                  return BackgroundCard(
+                    child: PaymentTable(
+                      transList: snapshot.data[1],
+                      saving: widget.saving,
+                      calculatedSaving: snapshot.data[0],
+                      currency: currency,
+                    ),
+                  );
+                } else {
+                  return Center(child: CircularProgressIndicator());
+                }
+              },
+            )
+          ],
+        ),
       ),
     );
   }

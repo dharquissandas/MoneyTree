@@ -45,9 +45,9 @@ class _TreePageState extends State<TreePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: ScrollConfiguration(
+        behavior: ScrollBehavior(),
         child: ListView(
-          physics: BouncingScrollPhysics(),
           children: <Widget>[
             // Saving Tree Heading
             Heading(
@@ -82,7 +82,7 @@ class _TreePageState extends State<TreePage> {
                       height: MediaQuery.of(context).size.height,
                       child: ListView.builder(
                         scrollDirection: Axis.vertical,
-                        physics: BouncingScrollPhysics(),
+                        physics: NeverScrollableScrollPhysics(),
                         padding: EdgeInsets.only(left: 16, right: 6),
                         itemCount: snapshot.data.length,
                         itemBuilder: (context, index) {

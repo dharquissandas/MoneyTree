@@ -41,138 +41,144 @@ class _BudgetInfoState extends State<BudgetInfo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        physics: BouncingScrollPhysics(),
-        children: <Widget>[
-          //Top Month Strip
-          FutureBuilder<dynamic>(
-              future:
-                  DBProvider.db.getFirstTransactionforCard(widget.bankCard.id),
-              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                if (snapshot.hasData && snapshot.data != Null) {
-                  return Container(
-                    color: Colors.white,
-                    child: MonthStrip(
-                      format: 'MMM yyyy',
-                      from: snapshot.data,
-                      to: currMonth,
-                      initialMonth: selectedMonth,
-                      height: 48,
-                      viewportFraction: 0.25,
-                      onMonthChanged: (v) {
-                        setState(() {
-                          selectedMonth = v;
-                        });
-                      },
-                    ),
+      body: ScrollConfiguration(
+        behavior: ScrollBehavior(),
+        child: ListView(
+          children: <Widget>[
+            //Top Month Strip
+            FutureBuilder<dynamic>(
+                future: DBProvider.db
+                    .getFirstTransactionforCard(widget.bankCard.id),
+                builder:
+                    (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                  if (snapshot.hasData && snapshot.data != Null) {
+                    return Container(
+                      color: Colors.white,
+                      child: MonthStrip(
+                        format: 'MMM yyyy',
+                        from: snapshot.data,
+                        to: currMonth,
+                        initialMonth: selectedMonth,
+                        height: 48,
+                        viewportFraction: 0.25,
+                        onMonthChanged: (v) {
+                          setState(() {
+                            selectedMonth = v;
+                          });
+                        },
+                      ),
+                    );
+                  } else {
+                    return Container();
+                  }
+                }),
+
+            //Seperator
+            Divider(
+              height: 1.0,
+            ),
+
+            //Bankcard
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: BankCardDisplay(
+                height: 199,
+                width: 344,
+                bc: widget.bankCard,
+                clickable: false,
+                currency: currency,
+              ),
+            ),
+
+            //Monthly Budget Analysis Heading
+            Heading(
+              title: "Monthly Budget Analysis",
+              fontSize: 20,
+              padding: EdgeInsets.only(left: 16, top: 8, right: 16, bottom: 8),
+            ),
+
+            // Budget Overview For Card For Selected Month
+            FutureBuilder<List<double>>(
+              future: Future.wait([
+                DBProvider.db.getMonthIncome(widget.bankCard.id, selectedMonth),
+                DBProvider.db
+                    .getMonthExpense(widget.bankCard.id, selectedMonth),
+                DBProvider.db
+                    .getMonthSavingTrans(widget.bankCard.id, selectedMonth),
+              ]),
+              builder:
+                  (BuildContext context, AsyncSnapshot<List<double>> snapshot) {
+                if (snapshot.hasData) {
+                  return OverviewCard(
+                    currency: currency,
+                    total:
+                        snapshot.data[0] + snapshot.data[1] + snapshot.data[2],
+                    income: snapshot.data[0],
+                    expense: snapshot.data[1],
+                    saving: snapshot.data[2],
                   );
                 } else {
                   return Container();
                 }
-              }),
-
-          //Seperator
-          Divider(
-            height: 1.0,
-          ),
-
-          //Bankcard
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: BankCardDisplay(
-              height: 199,
-              width: 344,
-              bc: widget.bankCard,
-              clickable: false,
-              currency: currency,
+              },
             ),
-          ),
 
-          //Monthly Budget Analysis Heading
-          Heading(
-            title: "Monthly Budget Analysis",
-            fontSize: 20,
-            padding: EdgeInsets.only(left: 16, top: 8, right: 16, bottom: 8),
-          ),
+            //Budget Overview Piechart
+            FutureBuilder<List<double>>(
+              future: Future.wait([
+                DBProvider.db.getMonthIncome(widget.bankCard.id, selectedMonth),
+                DBProvider.db
+                    .getMonthExpense(widget.bankCard.id, selectedMonth),
+                DBProvider.db
+                    .getMonthSavingTrans(widget.bankCard.id, selectedMonth)
+              ]),
+              builder:
+                  (BuildContext context, AsyncSnapshot<List<double>> snapshot) {
+                if (snapshot.hasData && checkDataTotal(snapshot.data)) {
+                  return BudgetOverviewGraph(
+                    income: snapshot.data[0],
+                    expense: snapshot.data[1],
+                    saving: snapshot.data[2],
+                    currency: currency,
+                  );
+                } else {
+                  return Container();
+                }
+              },
+            ),
 
-          // Budget Overview For Card For Selected Month
-          FutureBuilder<List<double>>(
-            future: Future.wait([
-              DBProvider.db.getMonthIncome(widget.bankCard.id, selectedMonth),
-              DBProvider.db.getMonthExpense(widget.bankCard.id, selectedMonth),
-              DBProvider.db
-                  .getMonthSavingTrans(widget.bankCard.id, selectedMonth),
-            ]),
-            builder:
-                (BuildContext context, AsyncSnapshot<List<double>> snapshot) {
-              if (snapshot.hasData) {
-                return OverviewCard(
-                  currency: currency,
-                  total: snapshot.data[0] + snapshot.data[1] + snapshot.data[2],
-                  income: snapshot.data[0],
-                  expense: snapshot.data[1],
-                  saving: snapshot.data[2],
-                );
-              } else {
-                return Container();
-              }
-            },
-          ),
+            // Weekly Budget Overview Graph
+            FutureBuilder<List<dynamic>>(
+              future: Future.wait([
+                DBProvider.db
+                    .getLineGraphIncomeData(widget.bankCard.id, selectedMonth),
+                DBProvider.db
+                    .getLineGraphExpenseData(widget.bankCard.id, selectedMonth),
+                DBProvider.db
+                    .getLineGraphSavingsData(widget.bankCard.id, selectedMonth),
+              ]),
+              builder: (BuildContext context,
+                  AsyncSnapshot<List<dynamic>> snapshot) {
+                if (snapshot.hasData) {
+                  return WeeklyBudgetGraph(
+                    incomedata: snapshot.data[0],
+                    expensedata: snapshot.data[1],
+                    savingdata: snapshot.data[2],
+                    currency: currency,
+                  );
+                } else {
+                  return Container();
+                }
+              },
+            ),
 
-          //Budget Overview Piechart
-          FutureBuilder<List<double>>(
-            future: Future.wait([
-              DBProvider.db.getMonthIncome(widget.bankCard.id, selectedMonth),
-              DBProvider.db.getMonthExpense(widget.bankCard.id, selectedMonth),
-              DBProvider.db
-                  .getMonthSavingTrans(widget.bankCard.id, selectedMonth)
-            ]),
-            builder:
-                (BuildContext context, AsyncSnapshot<List<double>> snapshot) {
-              if (snapshot.hasData && checkDataTotal(snapshot.data)) {
-                return BudgetOverviewGraph(
-                  income: snapshot.data[0],
-                  expense: snapshot.data[1],
-                  saving: snapshot.data[2],
-                  currency: currency,
-                );
-              } else {
-                return Container();
-              }
-            },
-          ),
-
-          // Weekly Budget Overview Graph
-          FutureBuilder<List<dynamic>>(
-            future: Future.wait([
-              DBProvider.db
-                  .getLineGraphIncomeData(widget.bankCard.id, selectedMonth),
-              DBProvider.db
-                  .getLineGraphExpenseData(widget.bankCard.id, selectedMonth),
-              DBProvider.db
-                  .getLineGraphSavingsData(widget.bankCard.id, selectedMonth),
-            ]),
-            builder:
-                (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
-              if (snapshot.hasData) {
-                return WeeklyBudgetGraph(
-                  incomedata: snapshot.data[0],
-                  expensedata: snapshot.data[1],
-                  savingdata: snapshot.data[2],
-                  currency: currency,
-                );
-              } else {
-                return Container();
-              }
-            },
-          ),
-
-          //Prevent Bounceback
-          SizedBox(
-            height: 40,
-            width: double.infinity,
-          )
-        ],
+            //Prevent Bounceback
+            SizedBox(
+              height: 40,
+              width: double.infinity,
+            )
+          ],
+        ),
       ),
     );
   }

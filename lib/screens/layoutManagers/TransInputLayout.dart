@@ -69,11 +69,6 @@ class _TransInputState extends State<TransInput> {
 
   //Add / Update Income Transaction
   addorUpdateIncomeTransaction() {
-    if (!incomeformkey.currentState.validate()) {
-      return;
-    }
-    incomeformkey.currentState.save();
-
     if (incomeid == -1) {
       var newIncomeTransaction = IncomeTransaction(
           name: incomename,
@@ -103,10 +98,6 @@ class _TransInputState extends State<TransInput> {
 
   //Add / Update Expense Transaction
   addorUpdateExpenseTransaction() {
-    if (!expenseformkey.currentState.validate()) {
-      return;
-    }
-    expenseformkey.currentState.save();
     if (expenseid == -1) {
       var newExpenseTransaction = ExpenseTransaction(
           name: expensename,
@@ -139,11 +130,6 @@ class _TransInputState extends State<TransInput> {
 
   //Add / Update Saving Transaction
   addorUpdateSavingTransaction() {
-    if (!savingpaymentkey.currentState.validate()) {
-      return;
-    }
-    savingpaymentkey.currentState.save();
-
     if (savingid == -1) {
       var newSavingTransaction = SavingTransaction(
           paymentaccount: paymentaccount,
@@ -179,16 +165,28 @@ class _TransInputState extends State<TransInput> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (pageIndex == 0) {
+            if (!incomeformkey.currentState.validate()) {
+              return;
+            }
+            incomeformkey.currentState.save();
             addorUpdateIncomeTransaction();
           } else if (pageIndex == 1) {
+            if (!expenseformkey.currentState.validate()) {
+              return;
+            }
+            expenseformkey.currentState.save();
             addorUpdateExpenseTransaction();
           } else if (pageIndex == 2) {
+            if (!savingpaymentkey.currentState.validate()) {
+              return;
+            }
+            savingpaymentkey.currentState.save();
             addorUpdateSavingTransaction();
           }
           Navigator.pushAndRemoveUntil(
               context,
               PageTransition(type: PageTransitionType.upToDown, child: Home()),
-              (r) => false);
+              (r) => false).whenComplete(() => setState(() => {}));
         },
         child: Icon(Icons.check),
         backgroundColor: Colors.teal[300],

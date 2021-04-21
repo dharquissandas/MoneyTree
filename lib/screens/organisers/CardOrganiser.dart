@@ -145,6 +145,13 @@ class _CardOrganiserState extends State<CardOrganiser> {
                       children: <Widget>[
                         Row(
                           children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: Icon(
+                                Icons.menu,
+                                color: Colors.grey,
+                              ),
+                            ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.center,

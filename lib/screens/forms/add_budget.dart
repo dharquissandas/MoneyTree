@@ -310,7 +310,7 @@ class _AddBudgetState extends State<AddBudget> {
           return ListView.builder(
             itemCount: snapshot.data.length,
             shrinkWrap: true,
-            physics: BouncingScrollPhysics(),
+            physics: NeverScrollableScrollPhysics(),
             itemBuilder: (BuildContext context, int index) {
               Category c = snapshot.data[index];
               return Dismissible(
@@ -426,35 +426,36 @@ class _AddBudgetState extends State<AddBudget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          iconTheme: IconThemeData(
-            color: Colors.black,
-          ),
-          backgroundColor: Colors.white,
-          centerTitle: true,
-          title: Text(
-            "Create Monthly Budget",
-            style: TextStyle(color: Colors.black),
-          ),
+      appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.black,
         ),
-        floatingActionButton: Padding(
-          padding: EdgeInsets.only(bottom: 12),
-          child: Builder(
-            builder: (BuildContext context) {
-              return FloatingActionButton.extended(
-                icon: Icon(Icons.check),
-                backgroundColor: Colors.teal[300],
-                elevation: 20,
-                label: Text("Confirm"),
-                onPressed: () {
-                  addOrUpdateBudget();
-                },
-              );
-            },
-          ),
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        title: Text(
+          "Create Monthly Budget",
+          style: TextStyle(color: Colors.black),
         ),
-        body: ListView(
-          physics: BouncingScrollPhysics(),
+      ),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: 12),
+        child: Builder(
+          builder: (BuildContext context) {
+            return FloatingActionButton.extended(
+              icon: Icon(Icons.check),
+              backgroundColor: Colors.teal[300],
+              elevation: 20,
+              label: Text("Confirm"),
+              onPressed: () {
+                addOrUpdateBudget();
+              },
+            );
+          },
+        ),
+      ),
+      body: ScrollConfiguration(
+        behavior: ScrollBehavior(),
+        child: ListView(
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 0, 8),
@@ -474,6 +475,8 @@ class _AddBudgetState extends State<AddBudget> {
               height: 80,
             )
           ],
-        ));
+        ),
+      ),
+    );
   }
 }

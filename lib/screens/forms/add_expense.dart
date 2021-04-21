@@ -292,16 +292,19 @@ class _AddExpenseState extends State<AddExpense> {
         padding: EdgeInsets.only(left: 16, right: 16),
         child: Form(
           key: expenseformkey,
-          child: ListView(
-            physics: BouncingScrollPhysics(),
-            children: <Widget>[
-              buildName(),
-              buildCardCategory(),
-              buildCategory(),
-              buildDate(),
-              buildAmount(),
-              buildNeedChoice(),
-            ],
+          child: ScrollConfiguration(
+            behavior: ScrollBehavior(),
+            child: ListView(
+              physics: BouncingScrollPhysics(),
+              children: <Widget>[
+                buildName(),
+                buildCardCategory(),
+                buildCategory(),
+                buildDate(),
+                buildAmount(),
+                buildNeedChoice(),
+              ],
+            ),
           ),
         ),
       ),

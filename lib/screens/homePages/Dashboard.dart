@@ -33,9 +33,9 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       //Main Container
-      body: Container(
+      body: ScrollConfiguration(
+        behavior: ScrollBehavior(),
         child: ListView(
-          physics: BouncingScrollPhysics(),
           children: <Widget>[
             //My Cards Text
             Heading(
@@ -195,7 +195,7 @@ class _DashboardState extends State<Dashboard> {
                       itemCount: snapshot.data.length,
                       padding: EdgeInsets.only(left: 16, right: 16),
                       shrinkWrap: true,
-                      physics: BouncingScrollPhysics(),
+                      physics: NeverScrollableScrollPhysics(),
                       itemBuilder: (BuildContext context, int index) {
                         IncomeTransaction it = snapshot.data[index];
                         return Container(
@@ -343,7 +343,7 @@ class _DashboardState extends State<Dashboard> {
                       itemCount: snapshot.data.length,
                       padding: EdgeInsets.only(left: 16, right: 16),
                       shrinkWrap: true,
-                      physics: BouncingScrollPhysics(),
+                      physics: NeverScrollableScrollPhysics(),
                       itemBuilder: (BuildContext context, int index) {
                         ExpenseTransaction et = snapshot.data[index];
                         return Container(

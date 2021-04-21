@@ -40,10 +40,12 @@ class _AddIncomeState extends State<AddIncome> {
           rightSymbol: value, decimalSymbol: ".", thousandSymbol: ",");
       setState(() {});
     }).then((value) {
-      currencycontroller.text =
-          FlutterMoneyFormatter(amount: widget.transaction.amount)
-              .output
-              .nonSymbol;
+      try {
+        currencycontroller.text =
+            FlutterMoneyFormatter(amount: widget.transaction.amount)
+                .output
+                .nonSymbol;
+      } catch (e) {}
     });
     if (widget.transaction != null) {
       incomeid = widget.transaction.id;

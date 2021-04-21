@@ -302,194 +302,204 @@ class _BudgetPlannerState extends State<BudgetPlanner> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        physics: BouncingScrollPhysics(),
-        children: <Widget>[
-          //Month List Builder
-          FutureBuilder<dynamic>(
-              future:
-                  DBProvider.db.getFirstTransactionforCard(widget.bankCard.id),
-              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                if (snapshot.hasData && snapshot.data != Null) {
-                  return Container(
-                    color: Colors.white,
-                    child: MonthStrip(
-                      format: 'MMM yyyy',
-                      from: snapshot.data,
-                      to: currMonth,
-                      initialMonth: selectedMonth,
-                      height: 48,
-                      viewportFraction: 0.25,
-                      onMonthChanged: (v) {
-                        selectedMonth = v;
-                        buildSelectedMonthBudget();
-                        setState(() {});
-                      },
-                    ),
-                  );
-                } else {
-                  return Container();
-                }
-              }),
+      body: ScrollConfiguration(
+        behavior: ScrollBehavior(),
+        child: ListView(
+          children: <Widget>[
+            //Month List Builder
+            FutureBuilder<dynamic>(
+                future: DBProvider.db
+                    .getFirstTransactionforCard(widget.bankCard.id),
+                builder:
+                    (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                  if (snapshot.hasData && snapshot.data != Null) {
+                    return Container(
+                      color: Colors.white,
+                      child: MonthStrip(
+                        format: 'MMM yyyy',
+                        from: snapshot.data,
+                        to: currMonth,
+                        initialMonth: selectedMonth,
+                        height: 48,
+                        viewportFraction: 0.25,
+                        onMonthChanged: (v) {
+                          selectedMonth = v;
+                          buildSelectedMonthBudget();
+                          setState(() {});
+                        },
+                      ),
+                    );
+                  } else {
+                    return Container();
+                  }
+                }),
 
-          //Seperator
-          Divider(
-            height: 1.0,
-          ),
+            //Seperator
+            Divider(
+              height: 1.0,
+            ),
 
-          //Comparison Heading
-          Heading(
-              title: "Budgeted & Actual Comparison",
+            //Comparison Heading
+            Heading(
+                title: "Budgeted & Actual Comparison",
+                fontSize: 20,
+                padding: EdgeInsets.only(
+                  left: 16,
+                  top: 8,
+                  right: 16,
+                  bottom: 8,
+                )),
+
+            //Display If No Budget Created
+            buildBudgetChecker(currMonthBudget, selectedMonth, currMonth),
+
+            //Budget vs Actual Comparison Graph
+            FutureBuilder<List<dynamic>>(
+                future: Future.wait([
+                  DBProvider.db
+                      .getMonthWantExpense(widget.bankCard.id, selectedMonth),
+                  DBProvider.db
+                      .getMonthSavingTrans(widget.bankCard.id, selectedMonth),
+                  DBProvider.db
+                      .getMonthNeedExpense(widget.bankCard.id, selectedMonth),
+                  DBProvider.db
+                      .getMonthBudget(widget.bankCard.id, selectedMonth),
+                ]),
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<dynamic>> snapshot) {
+                  if (snapshot.hasData) {
+                    if (checkDataTotal([
+                          snapshot.data[0],
+                          snapshot.data[1],
+                          snapshot.data[2]
+                        ]) ||
+                        snapshot.data[3] != Null) {
+                      currMonthBudget = snapshot.data[3];
+                      return BudgetComparisonGraph(
+                          want: snapshot.data[0],
+                          save: snapshot.data[1],
+                          need: snapshot.data[2],
+                          budgeted: snapshot.data[3]);
+                    } else {
+                      return buildTransactionChecker();
+                    }
+                  } else {
+                    return Container();
+                  }
+                }),
+
+            //Expense Category Pie Chart
+            FutureBuilder<Map<String, double>>(
+                future: DBProvider.db.getMonthExpenseCategoryList(
+                    widget.bankCard.id, selectedMonth),
+                builder: (BuildContext context,
+                    AsyncSnapshot<Map<String, double>> snapshot) {
+                  if (snapshot.hasData && snapshot.data.values.last != 0) {
+                    return BudgetExpenseGraph(
+                      data: snapshot.data,
+                    );
+                  } else {
+                    return Container();
+                  }
+                }),
+
+            //Exceeding Categories Heading
+            Heading(
+              title: exceeding ? "Budget Exceedings" : "Near Budget Exceedings",
               fontSize: 20,
               padding: EdgeInsets.only(
                 left: 16,
-                top: 8,
+                top: 0,
                 right: 16,
                 bottom: 8,
-              )),
-
-          //Display If No Budget Created
-          buildBudgetChecker(currMonthBudget, selectedMonth, currMonth),
-
-          //Budget vs Actual Comparison Graph
-          FutureBuilder<List<dynamic>>(
-              future: Future.wait([
-                DBProvider.db
-                    .getMonthWantExpense(widget.bankCard.id, selectedMonth),
-                DBProvider.db
-                    .getMonthSavingTrans(widget.bankCard.id, selectedMonth),
-                DBProvider.db
-                    .getMonthNeedExpense(widget.bankCard.id, selectedMonth),
-                DBProvider.db.getMonthBudget(widget.bankCard.id, selectedMonth),
-              ]),
-              builder: (BuildContext context,
-                  AsyncSnapshot<List<dynamic>> snapshot) {
-                if (snapshot.hasData) {
-                  if (checkDataTotal([
-                        snapshot.data[0],
-                        snapshot.data[1],
-                        snapshot.data[2]
-                      ]) ||
-                      snapshot.data[3] != Null) {
-                    currMonthBudget = snapshot.data[3];
-                    return BudgetComparisonGraph(
-                        want: snapshot.data[0],
-                        save: snapshot.data[1],
-                        need: snapshot.data[2],
-                        budgeted: snapshot.data[3]);
-                  } else {
-                    return buildTransactionChecker();
-                  }
-                } else {
-                  return Container();
-                }
-              }),
-
-          //Expense Category Pie Chart
-          FutureBuilder<Map<String, double>>(
-              future: DBProvider.db.getMonthExpenseCategoryList(
-                  widget.bankCard.id, selectedMonth),
-              builder: (BuildContext context,
-                  AsyncSnapshot<Map<String, double>> snapshot) {
-                if (snapshot.hasData && snapshot.data.values.last != 0) {
-                  return BudgetExpenseGraph(
-                    data: snapshot.data,
-                  );
-                } else {
-                  return Container();
-                }
-              }),
-
-          //Exceeding Categories Heading
-          Heading(
-            title: exceeding ? "Budget Exceedings" : "Near Budget Exceedings",
-            fontSize: 20,
-            padding: EdgeInsets.only(
-              left: 16,
-              top: 0,
-              right: 16,
-              bottom: 8,
-            ),
-            child: RaisedButton(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18.0),
-                  side: BorderSide(color: Colors.teal[300])),
-              onPressed: () {
-                setState(() {
-                  if (exceeding) {
-                    exceeding = false;
-                  } else {
-                    exceeding = true;
-                  }
-                });
-              },
-              color: Colors.teal[300],
-              textColor: Colors.white,
-              child: Text(exceeding ? "Near" : "Exceeding",
-                  style: TextStyle(fontSize: 12)),
-            ),
-          ),
-
-          //Exceeding List Headings
-          BackgroundCard(
-            height: 50,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Category',
-                      style: GoogleFonts.inter(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black)),
-                  Text('Budgeted',
-                      style: GoogleFonts.inter(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black)),
-                  Text('Actual',
-                      style: GoogleFonts.inter(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black)),
-                  Text('Deficit',
-                      style: GoogleFonts.inter(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black)),
-                ],
+              ),
+              child: RaisedButton(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                    side: BorderSide(color: Colors.teal[300])),
+                onPressed: () {
+                  setState(() {
+                    if (exceeding) {
+                      exceeding = false;
+                    } else {
+                      exceeding = true;
+                    }
+                  });
+                },
+                color: Colors.teal[300],
+                textColor: Colors.white,
+                child: Text(exceeding ? "Near" : "Exceeding",
+                    style: TextStyle(fontSize: 12)),
               ),
             ),
-          ),
 
-          //Dynamic Exceeding List
-          FutureBuilder<List<dynamic>>(
-              future: Future.wait([
-                DBProvider.db.getMonthExpenseCategoryList(
-                    widget.bankCard.id, selectedMonth),
-                DBProvider.db.getMonthBudget(widget.bankCard.id, selectedMonth),
-              ]),
-              builder: (BuildContext context,
-                  AsyncSnapshot<List<dynamic>> snapshot) {
-                if (snapshot.hasData && snapshot.data[1] != Null) {
-                  dynamic lists =
-                      budgetComparisons(snapshot.data[0], snapshot.data[1]);
-                  return exceeding
-                      ? buildExceedingList(lists[1])
-                      : buildExceedingList(lists[0]);
-                } else {
-                  return buildBudgetChecker(
-                      currMonthBudget, selectedMonth, currMonth);
-                }
-              }),
+            //Exceeding List Headings
+            BackgroundCard(
+              height: 50,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16, right: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Category',
+                        style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black)),
+                    Text('Budgeted',
+                        style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black)),
+                    Text('Actual',
+                        style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black)),
+                    Text('Deficit',
+                        style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black)),
+                  ],
+                ),
+              ),
+            ),
 
-          //Tailing Space
-          SizedBox(
-            height: 80,
-            width: double.infinity,
-          ),
-        ],
+            //Dynamic Exceeding List
+            FutureBuilder<List<dynamic>>(
+                future: Future.wait([
+                  DBProvider.db.getMonthExpenseCategoryList(
+                      widget.bankCard.id, selectedMonth),
+                  DBProvider.db
+                      .getMonthBudget(widget.bankCard.id, selectedMonth),
+                ]),
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<dynamic>> snapshot) {
+                  if (snapshot.hasData && snapshot.data[1] != Null) {
+                    dynamic lists =
+                        budgetComparisons(snapshot.data[0], snapshot.data[1]);
+                    if (exceeding && lists[1].length == 0 ||
+                        !exceeding && lists[0].length == 0) {
+                      return buildNoExceedingChecker();
+                    } else {
+                      return exceeding
+                          ? buildExceedingList(lists[1])
+                          : buildExceedingList(lists[0]);
+                    }
+                  } else {
+                    return buildBudgetChecker(
+                        currMonthBudget, selectedMonth, currMonth);
+                  }
+                }),
+
+            //Tailing Space
+            SizedBox(
+              height: 80,
+              width: double.infinity,
+            ),
+          ],
+        ),
       ),
     );
   }

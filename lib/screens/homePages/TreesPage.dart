@@ -91,6 +91,7 @@ class _TreePageState extends State<TreePage> {
                             margin:
                                 EdgeInsets.only(right: 10, bottom: 8, top: 8),
                             child: InkWell(
+                              borderRadius: BorderRadius.circular(20),
                               onTap: () {
                                 savingsRedirect(s);
                               },

@@ -159,6 +159,7 @@ class _AddBankCardState extends State<AddBankCard> {
   //Build Name On Card Field
   Widget buildNameOnCard() {
     return TextFormField(
+      key: Key("cardName"),
       autocorrect: true,
       controller: cardnamecontroller,
       decoration: InputDecoration(labelText: "Name On Card"),
@@ -177,6 +178,7 @@ class _AddBankCardState extends State<AddBankCard> {
   //Build Card Number Field
   Widget buildCardNumber() {
     return TextFormField(
+      key: Key("cardNumber"),
       controller: cardnumbercontroller,
       inputFormatters: [
         new LengthLimitingTextInputFormatter(4),
@@ -214,6 +216,7 @@ class _AddBankCardState extends State<AddBankCard> {
   Widget buildCardNetworkCategory() {
     loadCardNetworks();
     return DropdownButton(
+      key: Key("cardType"),
       hint: new Text('Select Card Type'),
       items: cardNetworks,
       value: selectedCard,
@@ -230,6 +233,7 @@ class _AddBankCardState extends State<AddBankCard> {
   //Build Amount field
   Widget buildAmount() {
     return TextFormField(
+      key: Key("cardAmount"),
       controller: controller,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(labelText: "Card Amount"),

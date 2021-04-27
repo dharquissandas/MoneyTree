@@ -44,17 +44,27 @@ class _TransInputState extends State<TransInput> {
   //Page Setter
   pageSetter() {
     if (pageIndex == 0) {
-      return AddIncome(
-        transaction: widget.transaction,
-      );
-    } else if (pageIndex == 1) {
-      return AddExpense(transaction: widget.transaction);
-    } else {
-      if (widget.saving != null) {
-        return AddSaving(
-            transaction: widget.transaction, saving: widget.saving);
+      if (widget.transaction is IncomeTransaction) {
+        return AddIncome(transaction: widget.transaction);
       } else {
-        return AddSaving(transaction: widget.transaction, saving: null);
+        return AddIncome(transaction: null);
+      }
+    } else if (pageIndex == 1) {
+      if (widget.transaction is ExpenseTransaction) {
+        return AddExpense(transaction: widget.transaction);
+      } else {
+        return AddExpense(transaction: null);
+      }
+    } else {
+      if (widget.transaction is SavingTransaction) {
+        if (widget.saving != null) {
+          return AddSaving(
+              transaction: widget.transaction, saving: widget.saving);
+        } else {
+          return AddSaving(transaction: widget.transaction, saving: null);
+        }
+      } else {
+        return AddSaving(transaction: null, saving: null);
       }
     }
   }
@@ -184,10 +194,12 @@ class _TransInputState extends State<TransInput> {
             savingpaymentkey.currentState.save();
             addorUpdateSavingTransaction();
           }
+
           Navigator.pushAndRemoveUntil(
               context,
-              PageTransition(type: PageTransitionType.upToDown, child: Home()),
-              (r) => false).whenComplete(() => setState(() => {}));
+              PageTransition(
+                  type: PageTransitionType.leftToRight, child: Home()),
+              (route) => false);
         },
         child: Icon(Icons.check),
         backgroundColor: Colors.teal[300],

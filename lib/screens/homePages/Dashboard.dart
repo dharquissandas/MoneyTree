@@ -12,6 +12,7 @@ import 'package:money_tree/screens/layoutManagers/BudgetLayout.dart';
 import 'package:money_tree/screens/layoutManagers/TransInputLayout.dart';
 import 'package:money_tree/screens/forms/add_bankcard.dart';
 import 'package:money_tree/utils/Database/Database.dart';
+import 'package:money_tree/utils/Messages.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:money_tree/utils/Preferences.dart';
 
@@ -190,7 +191,7 @@ class _DashboardState extends State<Dashboard> {
                   AsyncSnapshot<List<IncomeTransaction>> snapshot) {
                 if (snapshot.hasData) {
                   if (snapshot.data.length == 0) {
-                    return Center(child: Text("No Income Transactions"));
+                    return buildNoTransactionChecker("Income");
                   } else {
                     return ListView.builder(
                       itemCount: snapshot.data.length,
@@ -217,7 +218,7 @@ class _DashboardState extends State<Dashboard> {
                             child: Ink(
                               height: 70,
                               padding: EdgeInsets.only(
-                                  left: 24, top: 12, bottom: 12, right: 22),
+                                  left: 24, top: 12, bottom: 12, right: 8),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(15),
@@ -282,21 +283,19 @@ class _DashboardState extends State<Dashboard> {
                                             fontWeight: FontWeight.w700,
                                             color: Colors.teal[300]),
                                       ),
-                                      InkWell(
-                                        onTap: () {
-                                          DBProvider.db
-                                              .deleteIncomeTransaction(it);
-                                          setState(() {});
-                                        },
-                                        child: Container(
-                                          padding: EdgeInsets.only(left: 12.0),
-                                          child: Text(
-                                            'x',
-                                            style: GoogleFonts.inter(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w700,
-                                                color: Colors.red),
+                                      Container(
+                                        child: IconButton(
+                                          iconSize: 20,
+                                          splashRadius: 30,
+                                          icon: Icon(
+                                            Icons.delete_sweep_outlined,
+                                            color: Colors.red,
                                           ),
+                                          onPressed: () {
+                                            DBProvider.db
+                                                .deleteIncomeTransaction(it);
+                                            setState(() {});
+                                          },
                                         ),
                                       ),
                                     ],
@@ -338,7 +337,7 @@ class _DashboardState extends State<Dashboard> {
                   AsyncSnapshot<List<ExpenseTransaction>> snapshot) {
                 if (snapshot.hasData) {
                   if (snapshot.data.length == 0) {
-                    return Center(child: Text("No Expense Transactions"));
+                    return buildNoTransactionChecker("Expense");
                   } else {
                     return ListView.builder(
                       itemCount: snapshot.data.length,
@@ -365,7 +364,7 @@ class _DashboardState extends State<Dashboard> {
                             child: Ink(
                               height: 70,
                               padding: EdgeInsets.only(
-                                  left: 24, top: 12, bottom: 12, right: 22),
+                                  left: 24, top: 12, bottom: 12, right: 8),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(15),
@@ -430,23 +429,21 @@ class _DashboardState extends State<Dashboard> {
                                             fontWeight: FontWeight.w700,
                                             color: Colors.teal[300]),
                                       ),
-                                      InkWell(
-                                        onTap: () {
-                                          DBProvider.db
-                                              .deleteExpenseTransaction(et);
-                                          setState(() {});
-                                        },
-                                        child: Container(
-                                          padding: EdgeInsets.only(left: 12.0),
-                                          child: Text(
-                                            'x',
-                                            style: GoogleFonts.inter(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w700,
-                                                color: Colors.red),
+                                      Container(
+                                        child: IconButton(
+                                          iconSize: 20,
+                                          splashRadius: 30,
+                                          icon: Icon(
+                                            Icons.delete_sweep_outlined,
+                                            color: Colors.red,
                                           ),
+                                          onPressed: () {
+                                            DBProvider.db
+                                                .deleteExpenseTransaction(et);
+                                            setState(() {});
+                                          },
                                         ),
-                                      )
+                                      ),
                                     ],
                                   ),
                                 ],

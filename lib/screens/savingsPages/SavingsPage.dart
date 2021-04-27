@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:money_tree/models/SavingsTransactionModel.dart';
 import 'package:money_tree/screens/layoutManagers/HomeLayout.dart';
 import 'package:money_tree/utils/Database/Database.dart';
+import 'package:money_tree/utils/Messages.dart';
 import 'package:money_tree/utils/Preferences.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -38,7 +39,7 @@ class _SavingsPageState extends State<SavingsPage> {
               AsyncSnapshot<List<SavingTransaction>> snapshot) {
             if (snapshot.hasData) {
               if (snapshot.data.length == 0) {
-                return Center(child: Text("No Saving Transactions"));
+                return buildNoTransactionChecker("Savings");
               } else {
                 return ScrollConfiguration(
                   behavior: ScrollBehavior(),
@@ -66,7 +67,7 @@ class _SavingsPageState extends State<SavingsPage> {
                           child: Ink(
                             height: 70,
                             padding: EdgeInsets.only(
-                                left: 24, top: 12, bottom: 12, right: 22),
+                                left: 24, top: 12, bottom: 12, right: 8),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(15),
@@ -130,32 +131,30 @@ class _SavingsPageState extends State<SavingsPage> {
                                           fontWeight: FontWeight.w700,
                                           color: Colors.teal[300]),
                                     ),
-                                    InkWell(
-                                      onTap: () {
-                                        DBProvider.db.deleteSavingTrans(st);
-                                        if (snapshot.connectionState !=
-                                            ConnectionState.done) {
-                                          setState(() {});
-                                        }
-                                        Navigator.pushAndRemoveUntil(
-                                                context,
-                                                PageTransition(
-                                                  type: PageTransitionType
-                                                      .upToDown,
-                                                  child: Home(),
-                                                ),
-                                                (route) => false)
-                                            .then((value) => setState(() {}));
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.only(left: 12.0),
-                                        child: Text(
-                                          'x',
-                                          style: GoogleFonts.inter(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w700,
-                                              color: Colors.red),
+                                    Container(
+                                      child: IconButton(
+                                        iconSize: 20,
+                                        splashRadius: 30,
+                                        icon: Icon(
+                                          Icons.delete_sweep_outlined,
+                                          color: Colors.red,
                                         ),
+                                        onPressed: () {
+                                          DBProvider.db.deleteSavingTrans(st);
+                                          if (snapshot.connectionState !=
+                                              ConnectionState.done) {
+                                            setState(() {});
+                                          }
+                                          Navigator.pushAndRemoveUntil(
+                                                  context,
+                                                  PageTransition(
+                                                    type: PageTransitionType
+                                                        .upToDown,
+                                                    child: Home(),
+                                                  ),
+                                                  (route) => false)
+                                              .then((value) => setState(() {}));
+                                        },
                                       ),
                                     ),
                                   ],

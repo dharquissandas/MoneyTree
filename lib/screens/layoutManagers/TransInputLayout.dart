@@ -152,6 +152,7 @@ class _TransInputState extends State<TransInput> {
     }
 
     savingpaymentkey.currentState.reset();
+    savingid = -1;
     saving = null;
     paymentaccount = null;
   }

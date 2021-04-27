@@ -117,6 +117,7 @@ class _HomeState extends State<Home> {
           )),
       backgroundColor: Colors.grey[100],
       floatingActionButton: FloatingActionButton(
+        key: Key("addTransButton"),
         onPressed: () {
           Navigator.push(
               context,

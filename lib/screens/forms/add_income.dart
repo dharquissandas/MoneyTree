@@ -104,6 +104,7 @@ class _AddIncomeState extends State<AddIncome> {
   //Build Income Source
   Widget buildName() {
     return TextFormField(
+      key: Key("incomeName"),
       autocorrect: true,
       controller: namecontroller,
       decoration: InputDecoration(labelText: "Income Source"),
@@ -125,6 +126,7 @@ class _AddIncomeState extends State<AddIncome> {
       onTap: () => _buildDate(context),
       child: AbsorbPointer(
         child: TextFormField(
+          key: Key("incomeDate"),
           controller: _date,
           keyboardType: TextInputType.datetime,
           decoration: InputDecoration(
@@ -143,11 +145,14 @@ class _AddIncomeState extends State<AddIncome> {
             (BuildContext context, AsyncSnapshot<List<Category>> snapshot) {
           if (snapshot.hasData) {
             return DropdownButtonFormField<int>(
+              key: Key("incomeType"),
               hint: new Text("Select Category"),
               value: incomecategory,
               items: snapshot.data
                   .map((cat) => DropdownMenuItem<int>(
-                      child: Text(cat.name), value: cat.id))
+                      key: Key(cat.id.toString()),
+                      child: Text(cat.name),
+                      value: cat.id))
                   .toList(),
               onChanged: (int value) {
                 setState(() {
@@ -175,10 +180,12 @@ class _AddIncomeState extends State<AddIncome> {
             (BuildContext context, AsyncSnapshot<List<BankCard>> snapshot) {
           if (snapshot.hasData) {
             return DropdownButtonFormField<int>(
+              key: Key("incomeCard"),
               hint: new Text("Select Bank Card"),
               value: incomebankcard,
               items: snapshot.data.map((cat) {
                 return DropdownMenuItem<int>(
+                    key: Key(cat.id.toString()),
                     child: Text(cat.cardType +
                         ": **** **** **** " +
                         cat.cardNumber.toString()),
@@ -205,6 +212,7 @@ class _AddIncomeState extends State<AddIncome> {
   //Build Income Amount
   Widget buildAmount() {
     return TextFormField(
+      key: Key("incomeAmount"),
       controller: currencycontroller,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(labelText: "Income Amount"),

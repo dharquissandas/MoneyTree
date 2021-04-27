@@ -43,6 +43,7 @@ class _DashboardState extends State<Dashboard> {
               fontSize: 22,
               padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 4),
               child: RaisedButton(
+                key: Key("addCardButton"),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18.0),
                     side: BorderSide(color: Colors.teal[300])),

@@ -139,18 +139,22 @@ class _AddBankCardState extends State<AddBankCard> {
   void loadCardNetworks() {
     cardNetworks = [];
     cardNetworks.add(new DropdownMenuItem(
+      key: Key("Visa"),
       child: new Text('Visa'),
       value: "Visa",
     ));
     cardNetworks.add(new DropdownMenuItem(
+      key: Key("Mastercard"),
       child: new Text('Mastercard'),
       value: "Mastercard",
     ));
     cardNetworks.add(new DropdownMenuItem(
+      key: Key("American Express"),
       child: new Text('American Express'),
       value: "American Express",
     ));
     cardNetworks.add(new DropdownMenuItem(
+      key: Key("Discover"),
       child: new Text('Discover'),
       value: "Discover",
     ));
@@ -202,6 +206,7 @@ class _AddBankCardState extends State<AddBankCard> {
       onTap: () => _buildDate(context),
       child: AbsorbPointer(
         child: TextFormField(
+          key: Key("cardDate"),
           controller: _date,
           keyboardType: TextInputType.datetime,
           decoration: InputDecoration(

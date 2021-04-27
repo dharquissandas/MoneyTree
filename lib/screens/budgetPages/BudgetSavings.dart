@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:money_tree/components/heading.dart';
 import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/models/SavingsTransactionModel.dart';
+import 'package:money_tree/screens/layoutManagers/HomeLayout.dart';
 import 'package:money_tree/screens/layoutManagers/TransInputLayout.dart';
 import 'package:money_tree/utils/Database/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
@@ -189,7 +190,19 @@ class _BudgetSavingsState extends State<BudgetSavings> {
                                       InkWell(
                                         onTap: () {
                                           DBProvider.db.deleteSavingTrans(st);
-                                          setState(() {});
+                                          if (snapshot.connectionState !=
+                                              ConnectionState.done) {
+                                            setState(() {});
+                                          }
+                                          Navigator.pushAndRemoveUntil(
+                                                  context,
+                                                  PageTransition(
+                                                    type: PageTransitionType
+                                                        .upToDown,
+                                                    child: Home(),
+                                                  ),
+                                                  (route) => false)
+                                              .then((value) => setState(() {}));
                                         },
                                         child: Container(
                                           padding: EdgeInsets.only(left: 12.0),

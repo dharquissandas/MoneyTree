@@ -204,7 +204,9 @@ class _AddSavingState extends State<AddSaving> {
           return 'Insufficiant Funds on Payment Card';
         }
         if (widget.transaction == null) {
-          if (controller.doubleValue >
+          if (controller.doubleValue ==
+              selectedSaving.totalAmount - selectedSaving.amountSaved) {
+          } else if (controller.doubleValue >
               selectedSaving.totalAmount - selectedSaving.amountSaved) {
             return 'Payment Surpasses Remaining Savings Amount';
           }

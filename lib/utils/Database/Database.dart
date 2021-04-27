@@ -979,6 +979,26 @@ class DBProvider {
     return savingslist;
   }
 
+  Future<List<Saving>> getCompleteSavings() async {
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM savings WHERE totalamount == amountsaved ORDER BY savingorder
+    ''');
+    List<Saving> savingslist =
+        res.isNotEmpty ? res.map((e) => Saving.fromMap(e)).toList() : [];
+    return savingslist;
+  }
+
+  Future<List<Saving>> getOngoingSavings() async {
+    final db = await database;
+    var res = await db.rawQuery('''
+      SELECT * FROM savings WHERE totalamount != amountsaved ORDER BY savingorder
+    ''');
+    List<Saving> savingslist =
+        res.isNotEmpty ? res.map((e) => Saving.fromMap(e)).toList() : [];
+    return savingslist;
+  }
+
   Future<Saving> getSavingById(id) async {
     final db = await database;
     var res = await db.rawQuery('''

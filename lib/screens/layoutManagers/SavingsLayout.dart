@@ -14,7 +14,8 @@ class SavingsLayout extends StatefulWidget {
   _SavingsLayoutState createState() => _SavingsLayoutState();
 }
 
-class _SavingsLayoutState extends State<SavingsLayout> {
+class _SavingsLayoutState extends State<SavingsLayout>
+    with TickerProviderStateMixin {
   int pageIndex;
   @override
   void initState() {

@@ -78,6 +78,42 @@ buildSavingsChecker() {
   );
 }
 
+//build No-Savings Card
+buildCompletedSavingsChecker() {
+  return BackgroundCard(
+    height: 90,
+    child: Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              "Please Complete A Saving",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(
+                "Just a little while longer and you'll have a completed savings. You've got this!",
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                )),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 // build No-Transaction Card
 buildTransactionChecker() {
   return BackgroundCard(

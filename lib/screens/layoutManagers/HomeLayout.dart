@@ -16,7 +16,8 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with TickerProviderStateMixin {
+  TabController _tabController;
   int pageIndex;
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -25,6 +26,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     pageIndex = 0;
   }
 
@@ -40,7 +42,9 @@ class _HomeState extends State<Home> {
     if (pageIndex == 0) {
       return Dashboard();
     } else if (pageIndex == 1) {
-      return TreePage();
+      return TreePage(
+        tabController: _tabController,
+      );
     } else if (pageIndex == 2) {
       return IncomePage();
     } else {
@@ -66,9 +70,105 @@ class _HomeState extends State<Home> {
             type: PageTransitionType.rightToLeft, child: SavingsOrganiser()));
   }
 
-  //Build Layout
-  @override
-  Widget build(BuildContext context) {
+  buildSavingsTreeNavBar() {
+    return Scaffold(
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              child: Text('Money Tree'),
+              decoration: BoxDecoration(
+                color: Colors.teal[300],
+              ),
+            ),
+            ListTile(
+                title: Text('Cards Organiser'),
+                onTap: () {
+                  openCardOrganiser();
+                }),
+            ListTile(
+              title: Text('Saving Tree Organiser'),
+              onTap: () {
+                openSavingsOrganiser();
+              },
+            ),
+            ListTile(
+              title: Text('Currency Selector'),
+              onTap: () {
+                openCurrencySelector(context);
+              },
+            ),
+            ListTile(
+              title: Text('Notifications'),
+              onTap: () {
+                openNotificationSelection(
+                    context, flutterLocalNotificationsPlugin);
+              },
+            ),
+          ],
+        ),
+      ),
+      appBar: AppBar(
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: [
+              Tab(
+                child: Text(
+                  "Ongoing",
+                  style: TextStyle(color: Colors.black, fontSize: 16),
+                ),
+              ),
+              Tab(
+                child: Text(
+                  "Complete",
+                  style: TextStyle(color: Colors.black, fontSize: 16),
+                ),
+              )
+            ],
+          ),
+          backgroundColor: Colors.white,
+          centerTitle: true,
+          iconTheme: IconThemeData(color: Colors.black),
+          title: Text(
+            "Money Tree",
+            style: TextStyle(color: Colors.black),
+          )),
+      backgroundColor: Colors.grey[100],
+      floatingActionButton: FloatingActionButton(
+        key: Key("addTransButton"),
+        onPressed: () {
+          Navigator.push(
+              context,
+              PageTransition(
+                  type: PageTransitionType.downToUp,
+                  child: TransInput(
+                    page: 0,
+                    transaction: null,
+                    saving: null,
+                  )));
+        },
+        child: Icon(Icons.add),
+        backgroundColor: Colors.teal[300],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      bottomNavigationBar: BubbleBottomBar(
+        opacity: 0.2,
+        backgroundColor: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+        currentIndex: pageIndex,
+        hasInk: true,
+        inkColor: Colors.black12,
+        hasNotch: true,
+        fabLocation: BubbleBottomBarFabLocation.end,
+        onTap: changePage,
+        items: buildPages(),
+      ),
+      body: pageSetter(),
+    );
+  }
+
+  buildnormalNavBar() {
     return Scaffold(
       drawer: Drawer(
         child: ListView(
@@ -147,6 +247,12 @@ class _HomeState extends State<Home> {
       ),
       body: pageSetter(),
     );
+  }
+
+  //Build Layout
+  @override
+  Widget build(BuildContext context) {
+    return pageIndex == 1 ? buildSavingsTreeNavBar() : buildnormalNavBar();
   }
 
   //Buld Buttom Tabs

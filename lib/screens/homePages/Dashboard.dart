@@ -69,53 +69,47 @@ class _DashboardState extends State<Dashboard> {
                 future: DBProvider.db.getBankCards(),
                 builder: (BuildContext context,
                     AsyncSnapshot<List<BankCard>> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    if (snapshot.hasData) {
-                      return Container(
-                        height: 215,
-                        child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            physics: BouncingScrollPhysics(),
-                            padding: EdgeInsets.only(left: 16, right: 10),
-                            itemCount: snapshot.data.length,
-                            itemBuilder: (context, index) {
-                              BankCard bc = snapshot.data[index];
-                              return Row(children: [
-                                InkWell(
-                                    borderRadius: BorderRadius.circular(20),
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        PageTransition(
-                                          type: PageTransitionType.rightToLeft,
-                                          child: BudgetLayout(
-                                            card: snapshot.data[index],
-                                          ),
+                  if (snapshot.hasData) {
+                    return Container(
+                      height: 215,
+                      child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          physics: BouncingScrollPhysics(),
+                          padding: EdgeInsets.only(left: 16, right: 10),
+                          itemCount: snapshot.data.length,
+                          itemBuilder: (context, index) {
+                            BankCard bc = snapshot.data[index];
+                            return Row(children: [
+                              InkWell(
+                                  borderRadius: BorderRadius.circular(20),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      PageTransition(
+                                        type: PageTransitionType.rightToLeft,
+                                        child: BudgetLayout(
+                                          card: snapshot.data[index],
                                         ),
-                                      );
-                                    },
-                                    child: BankCardDisplay(
-                                      height: 199,
-                                      width: 344,
-                                      bc: bc,
-                                      clickable: true,
-                                      currency: currency,
-                                    )),
-                                SizedBox(
-                                  height: 215,
-                                  width: 10,
-                                )
-                              ]);
-                            }),
-                      );
-                    } else {
-                      //Show error here
-                      return Container();
-                    }
-                  } else {
-                    return Center(
-                      child: CircularProgressIndicator(),
+                                      ),
+                                    );
+                                  },
+                                  child: BankCardDisplay(
+                                    height: 199,
+                                    width: 344,
+                                    bc: bc,
+                                    clickable: true,
+                                    currency: currency,
+                                  )),
+                              SizedBox(
+                                height: 215,
+                                width: 10,
+                              )
+                            ]);
+                          }),
                     );
+                  } else {
+                    //Show error here
+                    return Container();
                   }
                 }),
 

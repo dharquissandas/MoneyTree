@@ -1,22 +1,27 @@
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:money_tree/models/BankCardModel.dart';
 import 'package:money_tree/screens/organisers/CardOrganiser.dart';
 import 'package:money_tree/screens/homePages/Dashboard.dart';
 import 'package:money_tree/screens/layoutManagers/TransInputLayout.dart';
 import 'package:money_tree/screens/homePages/TreesPage.dart';
 import 'package:money_tree/screens/organisers/SavingsOrganiser.dart';
+import 'package:money_tree/utils/Database/Database.dart';
 import 'package:money_tree/utils/Dialogues.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:money_tree/screens/homePages/ExpensePage.dart';
 import 'package:money_tree/screens/homePages/IncomePage.dart';
 
 class Home extends StatefulWidget {
+  final String prevPage;
+  Home({Key key, this.prevPage}) : super(key: key);
   @override
   _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> with TickerProviderStateMixin {
+  dynamic totalAmount;
   TabController _tabController;
   int pageIndex;
 
@@ -40,6 +45,13 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   //Page Setter
   pageSetter() {
     if (pageIndex == 0) {
+      if (widget.prevPage == "transInputLayout") {
+        DBProvider.db.getIncomeCategories().then((value) {
+          setState(() {
+            totalAmount = value;
+          });
+        });
+      }
       return Dashboard();
     } else if (pageIndex == 1) {
       return TreePage(

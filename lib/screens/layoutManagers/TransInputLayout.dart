@@ -198,7 +198,10 @@ class _TransInputState extends State<TransInput> {
           Navigator.pushAndRemoveUntil(
               context,
               PageTransition(
-                  type: PageTransitionType.leftToRight, child: Home()),
+                  type: PageTransitionType.leftToRight,
+                  child: Home(
+                    prevPage: "transInputLayout",
+                  )),
               (route) => false);
         },
         child: Icon(Icons.check),

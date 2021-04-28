@@ -6,6 +6,7 @@ import 'package:money_tree/models/SavingsModel.dart';
 import 'package:money_tree/models/SavingsTransactionModel.dart';
 import 'package:money_tree/utils/Database/Database.dart';
 import 'package:money_tree/utils/Preferences.dart';
+import 'dart:math';
 
 int savingid = -1;
 int paymentaccount;
@@ -157,7 +158,9 @@ class _AddSavingState extends State<AddSaving> {
   //Build Savings Choice
   Widget buildSavingCategory() {
     return FutureBuilder<List<Saving>>(
-        future: DBProvider.db.getSavings(),
+        future: widget.saving == null && widget.transaction == null
+            ? DBProvider.db.getOngoingSavings()
+            : DBProvider.db.getSavings(),
         builder: (BuildContext context, AsyncSnapshot<List<Saving>> snapshot) {
           if (snapshot.hasData) {
             return DropdownButtonFormField<int>(
@@ -204,22 +207,23 @@ class _AddSavingState extends State<AddSaving> {
           return 'Insufficiant Funds on Payment Card';
         }
         if (widget.transaction == null) {
-          if (controller.doubleValue ==
-              selectedSaving.totalAmount - selectedSaving.amountSaved) {
-          } else if (controller.doubleValue >
-              selectedSaving.totalAmount - selectedSaving.amountSaved) {
+          if (controller.doubleValue >
+              roundDouble(
+                  selectedSaving.totalAmount - selectedSaving.amountSaved, 2)) {
             return 'Payment Surpasses Remaining Savings Amount';
           }
         } else {
           if (controller.doubleValue >
-              (selectedSaving.totalAmount - selectedSaving.amountSaved) +
+              roundDouble(
+                      selectedSaving.totalAmount - selectedSaving.amountSaved,
+                      2) +
                   widget.transaction.paymentamount) {
             return 'Payment Surpasses Remaining Savings Amount';
           }
         }
       },
       onSaved: (value) {
-        paymentamount = controller.doubleValue;
+        paymentamount = roundDouble(controller.doubleValue, 2);
       },
     );
   }
@@ -252,6 +256,12 @@ class _AddSavingState extends State<AddSaving> {
       title: new Text("Recurring Payment"),
       controlAffinity: ListTileControlAffinity.leading,
     );
+  }
+
+  //Rounding Method
+  double roundDouble(double value, int places) {
+    double mod = pow(10.0, places);
+    return ((value * mod).round().toDouble() / mod);
   }
 
   //Paint Fields On Screen

@@ -150,6 +150,7 @@ buildTransactionChecker() {
   );
 }
 
+//Display when there are no transactions
 buildNoTransactionChecker(String type) {
   return BackgroundCard(
     height: 70,
@@ -172,6 +173,41 @@ buildNoTransactionChecker(String type) {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: Text("Add some transactions to see them populate here.",
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                )),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+buildNoCardsChecker() {
+  return BackgroundCard(
+    height: 90,
+    child: Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              "No Bank Cards",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(
+                "Press the Add Card Button on the top right of your screen to get started.",
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,

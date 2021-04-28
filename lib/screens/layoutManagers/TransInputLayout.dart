@@ -56,15 +56,29 @@ class _TransInputState extends State<TransInput> {
         return AddExpense(transaction: null);
       }
     } else {
-      if (widget.transaction is SavingTransaction) {
-        if (widget.saving != null) {
-          return AddSaving(
-              transaction: widget.transaction, saving: widget.saving);
-        } else {
-          return AddSaving(transaction: widget.transaction, saving: null);
-        }
-      } else {
-        return AddSaving(transaction: null, saving: null);
+      if (widget.saving != null && widget.transaction is SavingTransaction) {
+        return AddSaving(
+          transaction: widget.transaction,
+          saving: widget.saving,
+        );
+      }
+      if (widget.saving == null && widget.transaction is SavingTransaction) {
+        return AddSaving(
+          transaction: widget.transaction,
+          saving: null,
+        );
+      }
+      if (widget.saving != null && !(widget.transaction is SavingTransaction)) {
+        return AddSaving(
+          transaction: null,
+          saving: widget.saving,
+        );
+      }
+      if (widget.saving == null && !(widget.transaction is SavingTransaction)) {
+        return AddSaving(
+          transaction: null,
+          saving: null,
+        );
       }
     }
   }

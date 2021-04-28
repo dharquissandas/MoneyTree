@@ -33,9 +33,9 @@ class _SavingInfoState extends State<SavingInfo> {
         child: ListView(
           children: <Widget>[
             // Savings Card
-            FutureBuilder<Saving>(
+            FutureBuilder<dynamic>(
               future: DBProvider.db.getSavingById(widget.saving.id),
-              builder: (BuildContext context, AsyncSnapshot<Saving> snapshot) {
+              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                 if (snapshot.hasData) {
                   Saving s = snapshot.data;
                   return Container(

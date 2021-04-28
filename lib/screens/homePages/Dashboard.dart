@@ -69,7 +69,7 @@ class _DashboardState extends State<Dashboard> {
                 future: DBProvider.db.getBankCards(),
                 builder: (BuildContext context,
                     AsyncSnapshot<List<BankCard>> snapshot) {
-                  if (snapshot.hasData) {
+                  if (snapshot.hasData && snapshot.data.length > 0) {
                     return Container(
                       height: 215,
                       child: ListView.builder(
@@ -109,7 +109,7 @@ class _DashboardState extends State<Dashboard> {
                     );
                   } else {
                     //Show error here
-                    return Container();
+                    return buildNoCardsChecker();
                   }
                 }),
 

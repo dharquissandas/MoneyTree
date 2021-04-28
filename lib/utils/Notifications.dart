@@ -28,7 +28,7 @@ tz.TZDateTime _nextInstance(int time) {
 //Turn On Daily Notifications
 scheduleRecorruingNotification(
     FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
-  final time = 21;
+  final time = 12;
   await flutterLocalNotificationsPlugin.zonedSchedule(
       0,
       'Money Tree Transactions',

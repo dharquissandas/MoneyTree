@@ -972,7 +972,7 @@ class DBProvider {
   Future<List<Saving>> getSavings() async {
     final db = await database;
     var res = await db.rawQuery('''
-      SELECT * FROM savings ORDER BY savingorder
+      SELECT * FROM savings ORDER BY savingorder DESC
     ''');
     List<Saving> savingslist =
         res.isNotEmpty ? res.map((e) => Saving.fromMap(e)).toList() : [];
@@ -982,7 +982,7 @@ class DBProvider {
   Future<List<Saving>> getCompleteSavings() async {
     final db = await database;
     var res = await db.rawQuery('''
-      SELECT * FROM savings WHERE totalamount == amountsaved ORDER BY savingorder
+      SELECT * FROM savings WHERE totalamount == amountsaved ORDER BY savingorder DESC
     ''');
     List<Saving> savingslist =
         res.isNotEmpty ? res.map((e) => Saving.fromMap(e)).toList() : [];
@@ -999,7 +999,7 @@ class DBProvider {
     return savingslist;
   }
 
-  Future<Saving> getSavingById(id) async {
+  dynamic getSavingById(id) async {
     final db = await database;
     var res = await db.rawQuery('''
     SELECT * FROM savings WHERE id = ?
@@ -1244,17 +1244,19 @@ class DBProvider {
       updateBankCard(bc.id, updatedcard);
     }).then((value) {
       getSavingById(st.saving).then((s) async {
-        Saving updatedSaving = Saving(
-            id: s.id,
-            savingOrder: s.savingOrder,
-            savingsItem: s.savingsItem,
-            amountSaved: s.amountSaved - st.paymentamount,
-            totalAmount: s.totalAmount,
-            startDate: s.startDate,
-            description: s.description,
-            calculated: s.calculated);
+        if (s != Null) {
+          Saving updatedSaving = Saving(
+              id: s.id,
+              savingOrder: s.savingOrder,
+              savingsItem: s.savingsItem,
+              amountSaved: s.amountSaved - st.paymentamount,
+              totalAmount: s.totalAmount,
+              startDate: s.startDate,
+              description: s.description,
+              calculated: s.calculated);
 
-        updateSaving(s.id, updatedSaving);
+          updateSaving(s.id, updatedSaving);
+        }
       }).then((value) {
         db.delete("savingstransactions", where: "id = ?", whereArgs: [st.id]);
       });

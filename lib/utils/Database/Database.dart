@@ -1209,7 +1209,7 @@ class DBProvider {
         newSavingTransaction(st);
       }
 
-      getSavingById(st.saving).then((value) {
+      getSavingById(st.saving).then((value) async {
         Saving updatedSaving = Saving(
             id: st.saving,
             savingOrder: value.savingOrder,
@@ -1221,7 +1221,7 @@ class DBProvider {
             description: value.description,
             calculated: value.calculated);
 
-        updateSaving(id, updatedSaving);
+        await updateSaving(id, updatedSaving);
       });
     });
 

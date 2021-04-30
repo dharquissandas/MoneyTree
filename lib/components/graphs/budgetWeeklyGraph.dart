@@ -52,6 +52,12 @@ class WeeklyBudgetGraph extends StatelessWidget {
     );
   }
 
+  //Rounding Method
+  double roundDouble(double value, int places) {
+    double mod = pow(10.0, places);
+    return ((value * mod).round().toDouble() / mod);
+  }
+
   // Initialise Data
   LineChartData getData() {
     List<double> totaldata = [];
@@ -127,10 +133,10 @@ class WeeklyBudgetGraph extends StatelessWidget {
   List<LineChartBarData> linesBarData1() {
     final LineChartBarData lineChartBarData1 = LineChartBarData(
       spots: [
-        FlSpot(1, incomedata[0]),
-        FlSpot(5, incomedata[1]),
-        FlSpot(9, incomedata[2]),
-        FlSpot(13, incomedata[3]),
+        FlSpot(1, roundDouble(incomedata[0], 2)),
+        FlSpot(5, roundDouble(incomedata[1], 2)),
+        FlSpot(9, roundDouble(incomedata[2], 2)),
+        FlSpot(13, roundDouble(incomedata[3], 2)),
       ],
       isCurved: false,
       colors: [
@@ -147,10 +153,10 @@ class WeeklyBudgetGraph extends StatelessWidget {
     );
     final LineChartBarData lineChartBarData2 = LineChartBarData(
       spots: [
-        FlSpot(1, expensedata[0]),
-        FlSpot(5, expensedata[1]),
-        FlSpot(9, expensedata[2]),
-        FlSpot(13, expensedata[3]),
+        FlSpot(1, roundDouble(expensedata[0], 2)),
+        FlSpot(5, roundDouble(expensedata[1], 2)),
+        FlSpot(9, roundDouble(expensedata[2], 2)),
+        FlSpot(13, roundDouble(expensedata[3], 2)),
       ],
       isCurved: false,
       colors: [
@@ -167,10 +173,10 @@ class WeeklyBudgetGraph extends StatelessWidget {
     );
     final LineChartBarData lineChartBarData3 = LineChartBarData(
       spots: [
-        FlSpot(1, savingdata[0]),
-        FlSpot(5, savingdata[1]),
-        FlSpot(9, savingdata[2]),
-        FlSpot(13, savingdata[3]),
+        FlSpot(1, roundDouble(savingdata[0], 2)),
+        FlSpot(5, roundDouble(savingdata[1], 2)),
+        FlSpot(9, roundDouble(savingdata[2], 2)),
+        FlSpot(13, roundDouble(savingdata[3], 2)),
       ],
       isCurved: false,
       colors: [

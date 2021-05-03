@@ -316,8 +316,13 @@ class _AddSavingGoalState extends State<AddSavingGoal> {
 
     if (calculate) {
       DBProvider.db.getSavings().then((value) {
+        int largestid = 0;
+        for (Saving a in value) {
+          if (a.id > largestid) largestid = a.id;
+        }
+
         CalculatedSaving cs = CalculatedSaving(
-          parentId: value.last.id,
+          parentId: largestid,
           goalDate: goalDate,
           feasiblePayment: feasiblePayment,
           paymentFrequency: paymentFrequency,

@@ -1055,7 +1055,7 @@ class DBProvider {
     return res;
   }
 
-  Future<CalculatedSaving> getCalculateSavingByParentId(int pid) async {
+  Future<CalculatedSaving> getCalculateSavingsByParentId(int pid) async {
     final db = await database;
     var res = await db
         .query("calculatedsavings", where: "parentid = ?", whereArgs: [pid]);

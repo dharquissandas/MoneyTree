@@ -26,7 +26,7 @@ class SavingsTreeCard extends StatelessWidget {
     }
 
     double percent = (s.amountSaved / s.totalAmount) * 100;
-    if (percent >= 1 && percent < 25) {
+    if (percent > 0 && percent < 25) {
       return Image.asset(
         "assets/images/1.png",
         height: 120,

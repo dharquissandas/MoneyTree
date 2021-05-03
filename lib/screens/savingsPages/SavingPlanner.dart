@@ -138,7 +138,7 @@ class _SavingsPlannerState extends State<SavingsPlanner> {
             //Calculated Saving Info
             FutureBuilder<CalculatedSaving>(
               future:
-                  DBProvider.db.getCalculateSavingByParentId(widget.saving.id),
+                  DBProvider.db.getCalculateSavingsByParentId(widget.saving.id),
               builder: (BuildContext context, AsyncSnapshot snapshot) {
                 if (snapshot.hasData) {
                   CalculatedSaving cs = snapshot.data;
@@ -160,7 +160,7 @@ class _SavingsPlannerState extends State<SavingsPlanner> {
             //Payment Plan Table
             FutureBuilder<dynamic>(
               future: Future.wait([
-                DBProvider.db.getCalculateSavingByParentId(widget.saving.id),
+                DBProvider.db.getCalculateSavingsByParentId(widget.saving.id),
                 DBProvider.db.getSavingsTransForSaving(widget.saving.id)
               ]),
               builder: (BuildContext context, AsyncSnapshot snapshot) {

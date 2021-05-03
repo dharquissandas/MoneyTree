@@ -193,6 +193,9 @@ class _AddBankCardState extends State<AddBankCard> {
         if (value.isEmpty) {
           return 'Card Number is Required';
         }
+        if (value.length != 4) {
+          return 'Please Enter the Last 4 Digits';
+        }
       },
       onSaved: (String value) {
         cardNumber = int.parse(value);

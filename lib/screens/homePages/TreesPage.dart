@@ -84,7 +84,7 @@ class _TreePageState extends State<TreePage> {
                   (BuildContext context, AsyncSnapshot<List<Saving>> snapshot) {
                 if (snapshot.hasData && snapshot.data.isNotEmpty) {
                   return Container(
-                    height: MediaQuery.of(context).size.height,
+                    height: (snapshot.data.length * 280).toDouble(),
                     child: ListView.builder(
                       scrollDirection: Axis.vertical,
                       physics: NeverScrollableScrollPhysics(),
@@ -157,7 +157,7 @@ class _TreePageState extends State<TreePage> {
                   (BuildContext context, AsyncSnapshot<List<Saving>> snapshot) {
                 if (snapshot.hasData && snapshot.data.isNotEmpty) {
                   return Container(
-                    height: MediaQuery.of(context).size.height,
+                    height: (snapshot.data.length * 280).toDouble(),
                     child: ListView.builder(
                       scrollDirection: Axis.vertical,
                       physics: NeverScrollableScrollPhysics(),

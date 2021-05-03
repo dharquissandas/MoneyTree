@@ -1,4 +1,4 @@
-# money_tree
+# Money Tree
 
 A new Flutter project that is now a part of my final year project. This is a revamped and re-imagined version of my previous attempt at making a budgeting application also available on my github page.
 
@@ -11,3 +11,6 @@ The user is able to set up a recurring income in the application that means that
 
 ## Research
 From the research I have done the reason people never save a lot of money is because they have nothing to hold them accountable if they go over their spend limit and that they never set amount goals or materialistic goals for the savings. My plan for tackling this is two-fold, for them to be accountable the next month the app automatically sets a higher savings goal and my idea for setting goals comes from addicted phone games where the user wants to get their rewards for completing tasks. On the whole, this is a very robust budgeting application with sophistications such as a receipt scanner and graphs and charts to visualise data but also has its gamification element to keep the user engaged while they are also saving money.
+
+## Installation
+In the source folder you will find the Money Tree.apk which can be installed onto Android Devices to fully utilise Money Tree.
